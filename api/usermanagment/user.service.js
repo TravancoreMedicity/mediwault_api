@@ -92,7 +92,9 @@ module.exports = {
     mobileExist: (mobile, callBack) => {
         mysqlpool.query(
             'SELECT * FROM user WHERE mobile = ?',
-            [mobile],
+            [
+                mobile
+            ],
             (error, results, fields) => {
                 if (error) {
                     return callBack(error)
@@ -104,6 +106,20 @@ module.exports = {
         mysqlpool.query(
             'SELECT * FROM user WHERE email = ?',
             [email],
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    insertOTP: (data, callBack) => {
+        mysqlpool.query(
+            `UPDATE user SET generatedotp = ? WHERE mobile = ? `,
+            [
+                data.otp,
+                data.mobile
+            ],
             (error, results, fields) => {
                 if (error) {
                     return callBack(error)
