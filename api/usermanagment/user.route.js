@@ -5,7 +5,8 @@ const {
     editUser,
     deleteUser,
     getUser,
-    getAllUser
+    getAllUser,
+    verifyOTPandLogin
 } = require('./user.controller');
 
 
@@ -14,6 +15,7 @@ router.patch('/editUser', editUser);
 router.delete('/deleteUser/:id', deleteUser);
 router.get('/getUser/:id', getUser);
 router.get('/getAllUser', getAllUser);
+router.post('/verifyOTP', verifyOTPandLogin)
 
 
 module.exports = router

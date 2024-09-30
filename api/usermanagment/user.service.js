@@ -126,5 +126,28 @@ module.exports = {
                 }
                 return callBack(null, results)
             })
+    },
+    verifyOTP: (data, callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                user_slno,
+                name,
+                login_type,
+                password_validity,
+                last_passwd_change_date
+            FROM  user 
+            WHERE generatedotp = ?
+            AND mobile  = ? 
+            AND user_status = 1`,
+            [
+                data.otp,
+                data.mobile
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
     }
 }
