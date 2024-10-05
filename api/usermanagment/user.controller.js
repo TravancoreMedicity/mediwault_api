@@ -14,7 +14,8 @@ const {
     verifyOTP
 } = require('./user.service');
 
-const { addHours, format } = require('date-fns')
+const { addHours, format } = require('date-fns');
+const logger = require('../../logger/logger');
 
 
 module.exports = {
@@ -23,6 +24,7 @@ module.exports = {
 
         mobileExist(body.mobile, (error, results) => {
             if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -38,6 +40,7 @@ module.exports = {
 
             emailExist(body.email, (error, results) => {
                 if (error) {
+                    logger.error(error)
                     return res.status(500).json({
                         success: 0,
                         message: "Database connection error"
@@ -73,6 +76,7 @@ module.exports = {
         const body = req.body
         editUser(body, (error, results) => {
             if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -88,6 +92,7 @@ module.exports = {
         const id = req.params.id
         deleteUser(id, (error, results) => {
             if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -103,6 +108,7 @@ module.exports = {
         const id = req.params.id
         getUser(id, (error, results) => {
             if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -125,6 +131,7 @@ module.exports = {
     getAllUser: (req, res) => {
         getAllUser((error, results) => {
             if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -150,6 +157,7 @@ module.exports = {
         // First check mobile number registerd or not
         mobileExist(trimmedNumber, (error, results) => {
             if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -167,6 +175,7 @@ module.exports = {
                 const otp = Math.floor(100000 + Math.random() * 900000)
                 insertOTP({ mobile: trimmedNumber, otp: otp }, (error, results) => {
                     if (error) {
+                        logger.error(error)
                         return res.status(500).json({
                             success: 0,
                             message: "Database connection error"
@@ -179,6 +188,7 @@ module.exports = {
                                 message: "OTP sent successfully"
                             });
                         }).catch((error) => {
+                            logger.error(error)
                             return res.status(200).json({
                                 success: 3,
                                 message: "Error in sending OTP,Please try again"
@@ -194,6 +204,7 @@ module.exports = {
         const body = req.body
         verifyOTP(body, (error, results) => {
             if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"

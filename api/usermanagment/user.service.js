@@ -1,6 +1,5 @@
 const mysqlpool = require('../../config/dbConfig')
-
-// console.log(mysqlpool)
+const logger = require('../../logger/logger')
 
 module.exports = {
     insertUser: (data, callBack) => {
@@ -17,6 +16,7 @@ module.exports = {
                 data.user_Status
             ],
             (error, results, fields) => {
+                logger.error(error)
                 if (error) {
                     return callBack(error)
                 }
@@ -52,6 +52,7 @@ module.exports = {
             ],
             (error, results, fields) => {
                 if (error) {
+                    logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -63,6 +64,7 @@ module.exports = {
             [id],
             (error, results, fields) => {
                 if (error) {
+                    logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -74,6 +76,7 @@ module.exports = {
             [id],
             (error, results, fields) => {
                 if (error) {
+                    logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -84,6 +87,7 @@ module.exports = {
             'SELECT * FROM user',
             (error, results, fields) => {
                 if (error) {
+                    logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -97,6 +101,7 @@ module.exports = {
             ],
             (error, results, fields) => {
                 if (error) {
+                    logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -108,6 +113,7 @@ module.exports = {
             [email],
             (error, results, fields) => {
                 if (error) {
+                    logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -122,6 +128,7 @@ module.exports = {
             ],
             (error, results, fields) => {
                 if (error) {
+                    logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -145,6 +152,7 @@ module.exports = {
             ],
             (error, results, fields) => {
                 if (error) {
+                    logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)

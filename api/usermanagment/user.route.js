@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { verifyToken } = require('../tokenValidation/tokenValidation');
 
 const {
     insertUser,
@@ -9,12 +10,11 @@ const {
     verifyOTPandLogin
 } = require('./user.controller');
 
-
-router.post('/insertUser', insertUser);
-router.patch('/editUser', editUser);
-router.delete('/deleteUser/:id', deleteUser);
-router.get('/getUser/:id', getUser);
-router.get('/getAllUser', getAllUser);
+router.post('/insertUser', verifyToken, insertUser);
+router.patch('/editUser', verifyToken, editUser);
+router.delete('/deleteUser/:id', verifyToken, deleteUser);
+router.get('/getUser/:id', verifyToken, getUser);
+router.get('/getAllUser', verifyToken, getAllUser);
 router.post('/verifyOTP', verifyOTPandLogin)
 
 
