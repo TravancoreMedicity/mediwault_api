@@ -2,12 +2,12 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    insertDocCategory: (data, callBack) => {
+    insertInstituteType: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_category_master (category_name,cat_status) VALUES (?,?)`,
+            `INSERT institution_type_master (institute_type_name,institute_type_status) VALUES (?,?)`,
             [
-                data.category_name,
-                data.cat_status
+                data.institute_type_name,
+                data.institute_type_status
             ],
             (error, results, fields) => {
                 if (error) {
@@ -18,16 +18,13 @@ module.exports = {
             }
         )
     },
-    editDocCategory: (data, callBack) => {
+    editInstituteTypeMaster: (data, callBack) => {
         mysqlpool.query(
-            `UPDATE doc_category_master
-                SET category_name = ?,
-                    cat_status = ?
-                WHERE cat_slno = ? `,
+            `UPDATE institution_type_master SET institute_type_name = ?, institute_type_status = ? WHERE institute_type_slno = ? `,
             [
-                data.category_name,
-                data.cat_status,
-                data.cat_slno
+                data.institute_type_name,
+                data.institute_type_status,
+                data.institute_type_slno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -38,13 +35,13 @@ module.exports = {
             }
         )
     },
-    getAllDocCategory: (callBack) => {
+    getAllInstituteType: (callBack) => {
         mysqlpool.query(
             `SELECT 
-                cat_slno,
-                category_name,
-                IF(cat_status = 0 , 'Inactive','Active') status
-            FROM doc_category_master`,
+                institute_type_slno,
+                institute_type_name,
+                IF(institute_type_status = 1 ,'Active','Inactive') status
+            FROM institution_type_master`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -54,22 +51,9 @@ module.exports = {
             }
         )
     },
-    getDocCategoryById: (id, callBack) => {
+    checkDuplicateInstituteTypeName: (data, callBack) => {
         mysqlpool.query(
-            `SELECT * FROM doc_category_master WHERE cat_slno = ?`,
-            [id],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error)
-                    return callBack(error)
-                }
-                return callBack(null, results)
-            }
-        )
-    },
-    docCategoryDuplicateCheck: (data, callBack) => {
-        mysqlpool.query(
-            `SELECT cat_slno FROM doc_category_master WHERE category_name = ?`,
+            `SELECT institute_type_slno FROM institution_type_master WHERE institute_type_name = ?`,
             [
                 data
             ],
@@ -82,13 +66,13 @@ module.exports = {
             }
         )
     },
-    selectCategoryMaster: (callBack) => {
+    getInstitutionTypeSelect: (callBack) => {
         mysqlpool.query(
             `SELECT 
-                cat_slno,
-                category_name
-            FROM doc_category_master 
-            WHERE cat_status = 1`,
+                institute_type_slno,
+                institute_type_name
+            FROM institution_type_master 
+            WHERE institute_type_status = 1`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)

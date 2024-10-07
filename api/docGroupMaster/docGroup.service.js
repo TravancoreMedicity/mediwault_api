@@ -2,13 +2,12 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    insertDocSubCategory: (data, callBack) => {
+    insertDocGroup: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_subcat_master (subcat_name,cat_slno,subcat_status) VALUES (?,?,?)`,
+            `INSERT INTO doc_group_master (group_name,group_status) VALUES (?,?) `,
             [
-                data.doc_sub_type_name,
-                data.category_slno,
-                data.status
+                data.group_name,
+                data.group_status
             ],
             (error, results, fields) => {
                 if (error) {
@@ -19,18 +18,13 @@ module.exports = {
             }
         )
     },
-    editDocSubCategory: (data, callBack) => {
+    editDocGroup: (data, callBack) => {
         mysqlpool.query(
-            `UPDATE doc_subcat_master 
-                SET subcat_name = ?,
-                    cat_slno = ? ,
-                    subcat_status =? 
-                WHERE subcat_slno = ?`,
+            `UPDATE doc_group_master SET group_name = ?, group_status = ? WHERE group_slno = ? `,
             [
-                data.doc_sub_type_name,
-                data.category_slno,
-                data.status,
-                data.subCatSlno
+                data.group_name,
+                data.group_status,
+                data.group_slno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -41,15 +35,13 @@ module.exports = {
             }
         )
     },
-    getAllDocSubCategory: (callBack) => {
+    getAllDocGroup: (callBack) => {
         mysqlpool.query(
             `SELECT 
-                S.subcat_slno,
-                S.subcat_name,
-                C.category_name,
-                IF(S.subcat_status = 1 , 'Active','Inactive') status
-            FROM doc_subcat_master S
-            LEFT JOIN doc_category_master C ON S.cat_slno = C.cat_slno`,
+                group_slno, 
+                group_name, 
+                IF(group_status = 1 , 'Active','Inactive') status 
+            FROM doc_group_master`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -59,9 +51,9 @@ module.exports = {
             }
         )
     },
-    subCategoryNameDuplicateCheck: (data, callBack) => {
+    checkGroupNameDuplicate: (data, callBack) => {
         mysqlpool.query(
-            `SELECT subcat_slno FROM doc_subcat_master WHERE subcat_name = ?`,
+            `SELECT group_slno FROM doc_group_master WHERE group_name = ?`,
             [
                 data
             ],
@@ -73,6 +65,5 @@ module.exports = {
                 return callBack(null, results)
             }
         )
-    },
-
+    }
 }

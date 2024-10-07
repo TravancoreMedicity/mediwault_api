@@ -1,18 +1,19 @@
 const logger = require('../../logger/logger');
 
 const {
-    insertDocSubCategory,
-    editDocSubCategory,
-    getAllDocSubCategory,
-    subCategoryNameDuplicateCheck
-} = require('./docSubCategory.service');
+    insertInstituteType,
+    editInstituteTypeMaster,
+    getAllInstituteType,
+    checkDuplicateInstituteTypeName,
+    getInstitutionTypeSelect
+} = require('./instituteType.service');
 
 module.exports = {
-    insertDocSubCategory: (req, res) => {
+    insertInstituteType: (req, res) => {
         const body = req.body
-        const subCategoryname = body?.sub_category_name?.trim()
+        const name = body?.institute_type_name?.trim()
 
-        subCategoryNameDuplicateCheck(subCategoryname, (err, results) => {
+        checkDuplicateInstituteTypeName(name, (err, results) => {
             if (err) {
                 logger.error(err)
                 return res.status(500).json({
@@ -23,11 +24,11 @@ module.exports = {
             if (results?.length > 0) {
                 return res.status(200).json({
                     success: 2,
-                    message: 'Sub category name already exist'
+                    message: 'Institute type name already exist'
                 })
             }
             if (results?.length === 0) {
-                insertDocSubCategory(body, (error, results) => {
+                insertInstituteType(body, (error, results) => {
                     if (error) {
                         logger.error(error)
                         return res.status(500).json({
@@ -43,12 +44,11 @@ module.exports = {
                 })
             }
         })
-
     },
 
-    editDocSubCategory: (req, res) => {
+    editInstituteTypeMaster: (req, res) => {
         const body = req.body
-        editDocSubCategory(body, (error, results) => {
+        editInstituteTypeMaster(body, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -70,19 +70,50 @@ module.exports = {
         })
     },
 
-    getAllDocSubCategory: (req, res) => {
-        getAllDocSubCategory((error, results) => {
-            if (error) {
-                logger.error(error)
+    getAllInstituteType: (req, res) => {
+        getAllInstituteType((err, results) => {
+            if (err) {
+                logger.error(err)
                 return res.status(500).json({
                     success: 0,
                     message: 'Database connection error'
                 })
             }
-            return res.status(200).json({
-                success: 1,
-                data: results
-            })
+            if (!results) {
+                return res.status(200).json({
+                    success: 2,
+                    data: []
+                });
+            }
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
         })
     },
+    getInstitutionTypeSelect: (req, res) => {
+        getInstitutionTypeSelect((err, results) => {
+            if (err) {
+                logger.error(err)
+                return res.status(500).json({
+                    success: 0,
+                    message: 'Database connection error'
+                })
+            }
+            if (!results) {
+                return res.status(200).json({
+                    success: 2,
+                    data: []
+                });
+            }
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    }
 }

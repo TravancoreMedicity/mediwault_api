@@ -2,12 +2,13 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    insertDocCategory: (data, callBack) => {
+    insertCourseMater: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_category_master (category_name,cat_status) VALUES (?,?)`,
+            `INSERT INTO course_master (course_name,course_type_slno,course_status) VALUES (?,?,?)`,
             [
-                data.category_name,
-                data.cat_status
+                data.course_name,
+                data.course_type_slno,
+                data.course_status
             ],
             (error, results, fields) => {
                 if (error) {
@@ -18,16 +19,15 @@ module.exports = {
             }
         )
     },
-    editDocCategory: (data, callBack) => {
+
+    editCourseMaster: (data, callBack) => {
         mysqlpool.query(
-            `UPDATE doc_category_master
-                SET category_name = ?,
-                    cat_status = ?
-                WHERE cat_slno = ? `,
+            `UPDATE course_master SET course_name = ?, course_type_slno = ?, course_status = ? WHERE course_slno = ? `,
             [
-                data.category_name,
-                data.cat_status,
-                data.cat_slno
+                data.course_name,
+                data.course_type_slno,
+                data.course_status,
+                data.course_slno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -38,13 +38,16 @@ module.exports = {
             }
         )
     },
-    getAllDocCategory: (callBack) => {
+
+    getAllCourseMaster: (callBack) => {
         mysqlpool.query(
             `SELECT 
-                cat_slno,
-                category_name,
-                IF(cat_status = 0 , 'Inactive','Active') status
-            FROM doc_category_master`,
+                course_master.course_slno,
+                course_master.course_name,
+                course_type.course_type_name,
+                IF(course_master.course_status = 1 ,'Active','Inactive') course_status
+            FROM course_master 
+            LEFT JOIN course_type ON course_type.course_type_slno = course_master.course_type_slno`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -54,9 +57,10 @@ module.exports = {
             }
         )
     },
-    getDocCategoryById: (id, callBack) => {
+
+    getCourseMasterById: (id, callBack) => {
         mysqlpool.query(
-            `SELECT * FROM doc_category_master WHERE cat_slno = ?`,
+            `SELECT * FROM course_master WHERE course_slno = ?`,
             [id],
             (error, results, fields) => {
                 if (error) {
@@ -67,12 +71,12 @@ module.exports = {
             }
         )
     },
-    docCategoryDuplicateCheck: (data, callBack) => {
+    getSelectCourseMaster: (callBack) => {
         mysqlpool.query(
-            `SELECT cat_slno FROM doc_category_master WHERE category_name = ?`,
-            [
-                data
-            ],
+            `SELECT 
+                course_slno,
+                course_name
+            FROM course_master`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -82,13 +86,12 @@ module.exports = {
             }
         )
     },
-    selectCategoryMaster: (callBack) => {
+    checkCourserName: (data, callBack) => {
         mysqlpool.query(
-            `SELECT 
-                cat_slno,
-                category_name
-            FROM doc_category_master 
-            WHERE cat_status = 1`,
+            `SELECT course_slno FROM course_master WHERE course_name = ?`,
+            [
+                data
+            ],
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)

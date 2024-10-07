@@ -1,18 +1,18 @@
 const logger = require('../../logger/logger');
 
 const {
-    insertDocSubCategory,
-    editDocSubCategory,
-    getAllDocSubCategory,
-    subCategoryNameDuplicateCheck
-} = require('./docSubCategory.service');
+    insertDocGroup,
+    editDocGroup,
+    getAllDocGroup,
+    checkGroupNameDuplicate
+} = require('./docGroup.service');
 
 module.exports = {
-    insertDocSubCategory: (req, res) => {
-        const body = req.body
-        const subCategoryname = body?.sub_category_name?.trim()
 
-        subCategoryNameDuplicateCheck(subCategoryname, (err, results) => {
+    insertDocGroup: (req, res) => {
+        const body = req.body
+        const groupName = body?.group_name?.trim()
+        checkGroupNameDuplicate(groupName, (err, results) => {
             if (err) {
                 logger.error(err)
                 return res.status(500).json({
@@ -23,11 +23,11 @@ module.exports = {
             if (results?.length > 0) {
                 return res.status(200).json({
                     success: 2,
-                    message: 'Sub category name already exist'
+                    message: 'Group name already exist'
                 })
             }
             if (results?.length === 0) {
-                insertDocSubCategory(body, (error, results) => {
+                insertDocGroup(body, (error, results) => {
                     if (error) {
                         logger.error(error)
                         return res.status(500).json({
@@ -43,12 +43,25 @@ module.exports = {
                 })
             }
         })
-
     },
-
-    editDocSubCategory: (req, res) => {
+    getAllDocGroup: (req, res) => {
+        getAllDocGroup((err, results) => {
+            if (err) {
+                logger.error(err)
+                return res.status(500).json({
+                    success: 0,
+                    message: 'Database connection error'
+                })
+            }
+            return res.status(200).json({
+                success: 1,
+                data: results
+            })
+        })
+    },
+    editDocGroup: (req, res) => {
         const body = req.body
-        editDocSubCategory(body, (error, results) => {
+        editDocGroup(body, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -68,21 +81,5 @@ module.exports = {
                 data: results
             })
         })
-    },
-
-    getAllDocSubCategory: (req, res) => {
-        getAllDocSubCategory((error, results) => {
-            if (error) {
-                logger.error(error)
-                return res.status(500).json({
-                    success: 0,
-                    message: 'Database connection error'
-                })
-            }
-            return res.status(200).json({
-                success: 1,
-                data: results
-            })
-        })
-    },
+    }
 }

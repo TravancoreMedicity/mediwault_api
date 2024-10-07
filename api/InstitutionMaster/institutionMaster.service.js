@@ -2,13 +2,13 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    insertDocSubCategory: (data, callBack) => {
+    insertInstitutionMaster: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_subcat_master (subcat_name,cat_slno,subcat_status) VALUES (?,?,?)`,
+            `INSERT INTO institution_master (institution_name,institute_type_slno,institution_status) VALUES (?,?,?)`,
             [
-                data.doc_sub_type_name,
-                data.category_slno,
-                data.status
+                data.institution_name,
+                data.institution_type_slno,
+                data.institution_status
             ],
             (error, results, fields) => {
                 if (error) {
@@ -19,37 +19,15 @@ module.exports = {
             }
         )
     },
-    editDocSubCategory: (data, callBack) => {
-        mysqlpool.query(
-            `UPDATE doc_subcat_master 
-                SET subcat_name = ?,
-                    cat_slno = ? ,
-                    subcat_status =? 
-                WHERE subcat_slno = ?`,
-            [
-                data.doc_sub_type_name,
-                data.category_slno,
-                data.status,
-                data.subCatSlno
-            ],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error)
-                    return callBack(error)
-                }
-                return callBack(null, results)
-            }
-        )
-    },
-    getAllDocSubCategory: (callBack) => {
+    getAllInstitutionMaster: (callBack) => {
         mysqlpool.query(
             `SELECT 
-                S.subcat_slno,
-                S.subcat_name,
-                C.category_name,
-                IF(S.subcat_status = 1 , 'Active','Inactive') status
-            FROM doc_subcat_master S
-            LEFT JOIN doc_category_master C ON S.cat_slno = C.cat_slno`,
+                I.institution_slno,
+                I.institution_name,
+                T.institute_type_name,
+                IF(I.institution_status = 1 ,'Active','Inactive') status
+            FROM institution_master I
+            LEFT JOIN institution_type_master T ON I.institute_type_slno = T.institute_type_slno`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -59,9 +37,27 @@ module.exports = {
             }
         )
     },
-    subCategoryNameDuplicateCheck: (data, callBack) => {
+    editInstitutionMaster: (data, callBack) => {
         mysqlpool.query(
-            `SELECT subcat_slno FROM doc_subcat_master WHERE subcat_name = ?`,
+            `UPDATE institution_master SET institution_name = ?, institute_type_slno = ?, institution_status = ? WHERE institution_slno = ?`,
+            [
+                data.institution_name,
+                data.institute_type_slno,
+                data.institution_status,
+                data.institution_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    checkDuplicateInstitutionName: (data, callBack) => {
+        mysqlpool.query(
+            `SELECT institution_slno FROM institution_master WHERE institution_name = ?`,
             [
                 data
             ],
@@ -73,6 +69,5 @@ module.exports = {
                 return callBack(null, results)
             }
         )
-    },
-
+    }
 }

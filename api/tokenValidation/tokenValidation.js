@@ -23,7 +23,7 @@ module.exports = {
         } else {
             logger.error("No token")
             return res.json({
-                success: 101,
+                status: 101,
                 message: "Invalid Token"
             });
         }

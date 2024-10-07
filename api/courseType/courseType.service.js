@@ -2,12 +2,12 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    insertDocCategory: (data, callBack) => {
+    insertCourseType: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_category_master (category_name,cat_status) VALUES (?,?)`,
+            `INSERT INTO course_type (course_type_name,course_type_status) VALUES (?,?)`,
             [
-                data.category_name,
-                data.cat_status
+                data.course_type_name,
+                data.course_type_status
             ],
             (error, results, fields) => {
                 if (error) {
@@ -18,33 +18,14 @@ module.exports = {
             }
         )
     },
-    editDocCategory: (data, callBack) => {
-        mysqlpool.query(
-            `UPDATE doc_category_master
-                SET category_name = ?,
-                    cat_status = ?
-                WHERE cat_slno = ? `,
-            [
-                data.category_name,
-                data.cat_status,
-                data.cat_slno
-            ],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error)
-                    return callBack(error)
-                }
-                return callBack(null, results)
-            }
-        )
-    },
-    getAllDocCategory: (callBack) => {
+
+    getAllCourseType: (callBack) => {
         mysqlpool.query(
             `SELECT 
-                cat_slno,
-                category_name,
-                IF(cat_status = 0 , 'Inactive','Active') status
-            FROM doc_category_master`,
+                course_type_slno,
+                course_type_name,
+                IF(course_type_status = 1 ,'Active','Inactive') status
+            FROM course_type`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -54,10 +35,14 @@ module.exports = {
             }
         )
     },
-    getDocCategoryById: (id, callBack) => {
+
+    getCourseTypeSelect: (callBack) => {
         mysqlpool.query(
-            `SELECT * FROM doc_category_master WHERE cat_slno = ?`,
-            [id],
+            `SELECT 
+                course_type_slno,
+                course_type_name
+            FROM course_type
+            WHERE course_type_status = 1`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -67,28 +52,31 @@ module.exports = {
             }
         )
     },
-    docCategoryDuplicateCheck: (data, callBack) => {
+
+    editCourseTypeMaster: (data, callBack) => {
         mysqlpool.query(
-            `SELECT cat_slno FROM doc_category_master WHERE category_name = ?`,
+            `UPDATE course_type SET course_type_name = ?, course_type_status = ? WHERE course_type_slno = ? `,
+            [
+                data.course_type_name,
+                data.course_type_status,
+                data.course_type_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    checkDuplicateCourseTypeName: (data, callBack) => {
+        mysqlpool.query(
+            `SELECT course_type_slno FROM course_type WHERE course_type_name = ?`,
             [
                 data
             ],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error)
-                    return callBack(error)
-                }
-                return callBack(null, results)
-            }
-        )
-    },
-    selectCategoryMaster: (callBack) => {
-        mysqlpool.query(
-            `SELECT 
-                cat_slno,
-                category_name
-            FROM doc_category_master 
-            WHERE cat_status = 1`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)

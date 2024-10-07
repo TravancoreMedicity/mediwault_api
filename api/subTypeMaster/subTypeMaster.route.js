@@ -1,5 +1,5 @@
 const router = require('express').Router();
-
+const { verifyToken } = require('../tokenValidation/tokenValidation');
 const {
     insertSubTypeMaster,
     editSubTypeMaster,
@@ -8,9 +8,9 @@ const {
 } = require('./subTypeMaster.controller');
 
 
-router.post('/insertSubTypeMaster', insertSubTypeMaster);
-router.patch('/editSubTypeMaster', editSubTypeMaster);
-router.get('/getAllSubTypeMaster', getAllSubTypeMaster);
-router.get('/getSubTypeMasterById/:id', getSubTypeMasterById);
+router.post('/insertSubTypeMaster', verifyToken, insertSubTypeMaster);
+router.patch('/editSubTypeMaster', verifyToken, editSubTypeMaster);
+router.get('/getAllSubTypeMaster', verifyToken, getAllSubTypeMaster);
+router.get('/getSubTypeMasterById/:id', verifyToken, getSubTypeMasterById);
 
 module.exports = router
