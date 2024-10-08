@@ -18,4 +18,16 @@ module.exports = {
             }
         )
     },
+    getSerialNumber: (callBack) => {
+        mysqlpool.query(
+            `SELECT number FROM serial_number WHERE type = 1`,
+            (error, results, fields) => {
+                logger.error(error)
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    }
 }
