@@ -76,7 +76,8 @@ module.exports = {
             `SELECT 
                 course_slno,
                 course_name
-            FROM course_master`,
+            FROM course_master
+            WHERE course_status = 1`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)

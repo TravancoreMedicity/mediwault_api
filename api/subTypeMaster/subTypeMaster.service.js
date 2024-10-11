@@ -80,5 +80,21 @@ module.exports = {
                 return callBack(null, results)
             }
         )
+    },
+    selectSubTypeMaster: (callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                sub_type_slno,
+                doc_sub_type_name
+            FROM doc_sub_type_master
+            WHERE doc_sub_type_status = 1`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
     }
 }

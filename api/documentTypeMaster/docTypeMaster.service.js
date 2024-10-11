@@ -105,6 +105,22 @@ module.exports = {
             }
         )
 
+    },
+    selectDocTypeMaster: (callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                doc_type_slno,
+                doc_type_master_name
+            FROM doc_type_master
+            WHERE doc_type_master_status = 1`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
     }
 
 }

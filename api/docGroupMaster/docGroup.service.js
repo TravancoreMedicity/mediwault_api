@@ -65,5 +65,21 @@ module.exports = {
                 return callBack(null, results)
             }
         )
+    },
+    getSelectGroupList: (callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                group_slno, 
+                group_name 
+            FROM doc_group_master 
+            WHERE group_status = 1`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
     }
 }

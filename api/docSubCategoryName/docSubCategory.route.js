@@ -4,12 +4,14 @@ const { verifyToken } = require('../tokenValidation/tokenValidation');
 const {
     insertDocSubCategory,
     editDocSubCategory,
-    getAllDocSubCategory
+    getAllDocSubCategory,
+    getSubCategoryList
 } = require('./docSubCategory.controller');
 
 
 router.post('/insertDocSubCategory', verifyToken, insertDocSubCategory);
 router.patch('/editDocSubCategory', verifyToken, editDocSubCategory);
 router.get('/getAllDocSubCategory', verifyToken, getAllDocSubCategory);
+router.get('/getSubCategoryList', verifyToken, getSubCategoryList)
 
 module.exports = router

@@ -4,7 +4,8 @@ const {
     insertInstitutionMaster,
     editInstitutionMaster,
     getAllInstitutionMaster,
-    checkDuplicateInstitutionName
+    checkDuplicateInstitutionName,
+    selectInstituteMaster
 } = require('./institutionMaster.service');
 
 module.exports = {
@@ -68,6 +69,27 @@ module.exports = {
 
     getAllInstitutionMaster: (req, res) => {
         getAllInstitutionMaster((err, results) => {
+            if (err) {
+                logger.error(err)
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                })
+            }
+            if (!results) {
+                return res.status(200).json({
+                    success: 2,
+                    data: []
+                })
+            }
+            return res.status(200).json({
+                success: 1,
+                data: results
+            })
+        })
+    },
+    selectInstituteMaster: (req, res) => {
+        selectInstituteMaster((err, results) => {
             if (err) {
                 logger.error(err)
                 return res.status(500).json({

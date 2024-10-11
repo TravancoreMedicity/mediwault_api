@@ -74,5 +74,22 @@ module.exports = {
             }
         )
     },
+    getSubCategoryList: (callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                subcat_slno,
+                subcat_name,
+                cat_slno
+            FROM doc_subcat_master 
+            WHERE subcat_status = 1`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
 
 }

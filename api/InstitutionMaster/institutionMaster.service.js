@@ -69,5 +69,21 @@ module.exports = {
                 return callBack(null, results)
             }
         )
+    },
+    selectInstituteMaster: (callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                institution_slno,
+                institution_name
+            FROM institution_master 
+            WHERE institution_status = 1`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
     }
 }

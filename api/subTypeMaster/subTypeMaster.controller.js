@@ -4,7 +4,8 @@ const {
     checkSubMasterNameDuplicate,
     editSubTypeMaster,
     getAllSubTypeMaster,
-    getSubTypeMasterById
+    getSubTypeMasterById,
+    selectSubTypeMaster
 } = require('./subTypeMaster.service');
 
 module.exports = {
@@ -90,6 +91,24 @@ module.exports = {
     getSubTypeMasterById: (req, res) => {
         const id = req.params.id
         getSubTypeMasterById(id, (error, results) => {
+            if (error) {
+                logger.error(error)
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    selectSubTypeMaster: (req, res) => {
+        selectSubTypeMaster((error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
