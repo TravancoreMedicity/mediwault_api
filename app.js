@@ -26,6 +26,7 @@ const institutionType = require('./api/InstituteTyeMaster/instituteType.route')
 const institutionMaster = require('./api/InstitutionMaster/institutionMaster.route')
 const courseType = require('./api/courseType/courseType.route')
 const courseMaster = require('./api/courseMaster/courseMater.route')
+const docMaster = require('./api/docMaster/docMaster.route')
 
 
 app.get('/api/generateOTP/:id', generateOTP)  // generate OTP function
@@ -41,7 +42,7 @@ app.use('/api/instituteType', institutionType)
 app.use('/api/institutionMaster', institutionMaster)
 app.use('/api/courseType', courseType)
 app.use('/api/courseMaster', courseMaster)
-
+app.use('/api/docMaster', docMaster)
 
 // General error handling middleware
 app.use((err, req, res, next) => {
