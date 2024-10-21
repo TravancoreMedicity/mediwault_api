@@ -2,9 +2,9 @@ const mysqlpool = require("../../config/dbConfig");
 const logger = require("../../logger/logger");
 
 module.exports = {
-    insertDocMaster: (data, callBack) => {
-        mysqlpool.query(
-            `INSERT INTO document_master (
+  insertDocMaster: (data, callBack) => {
+    mysqlpool.query(
+      `INSERT INTO document_master (
                 doc_id,
                 doc_number,
                 doc_name,
@@ -25,39 +25,39 @@ module.exports = {
                 docStatus
             ) 
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-            [
-                data.docID,
-                data.docNumber,
-                data.docName,
-                data.docDes,
-                data.docType,
-                data.docSubType,
-                data.institute,
-                data.course,
-                data.category,
-                data.subCategory,
-                data.group,
-                data.docDate,
-                data.docVersionDate,
-                data.docExpStart,
-                data.docExpEnd,
-                data.isRequiredExp,
-                data.isSecure,
-                1,
-            ],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return callBack(error);
-                }
-                return callBack(null, results);
-            }
-        );
-    },
+      [
+        data.docID,
+        data.docNumber,
+        data.docName,
+        data.docDes,
+        data.docType,
+        data.docSubType,
+        data.institute,
+        data.course,
+        data.category,
+        data.subCategory,
+        data.group,
+        data.docDate,
+        data.docVersionDate,
+        data.docExpStart,
+        data.docExpEnd,
+        data.isRequiredExp,
+        data.isSecure,
+        1,
+      ],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
 
-    getDocMaster: (callBack) => {
-        mysqlpool.query(
-            `SELECT 
+  getDocMaster: (callBack) => {
+    mysqlpool.query(
+      `SELECT 
                 D.doc_slno,
                 D.doc_id,
                 D.doc_number,
@@ -81,19 +81,19 @@ module.exports = {
             LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
             LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
             WHERE D.docStatus = 1`,
-            [],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return callBack(error);
-                }
-                return callBack(null, results);
-            }
-        );
-    },
-    getDocSecureOnly: (callBack) => {
-        mysqlpool.query(
-            `SELECT 
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  getDocSecureOnly: (callBack) => {
+    mysqlpool.query(
+      `SELECT 
                 doc_slno,
                 doc_id,
                 doc_number,
@@ -114,19 +114,19 @@ module.exports = {
                 isSecure
             FROM document_master 
             WHERE docStatus = 1 AND isSecure = 1`,
-            [],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return callBack(error);
-                }
-                return callBack(null, results);
-            }
-        );
-    },
-    getDocNonSecure: (callBack) => {
-        mysqlpool.query(
-            `SELECT 
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  getDocNonSecure: (callBack) => {
+    mysqlpool.query(
+      `SELECT 
                 doc_slno,
                 doc_id,
                 doc_number,
@@ -147,19 +147,19 @@ module.exports = {
                 isSecure
             FROM document_master 
             WHERE docStatus = 1 AND isSecure = 0`,
-            [],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return callBack(error);
-                }
-                return callBack(null, results);
-            }
-        );
-    },
-    getDocMasterById: (id, callBack) => {
-        mysqlpool.query(
-            `SELECT 
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  getDocMasterById: (id, callBack) => {
+    mysqlpool.query(
+      `SELECT 
                 doc_slno,
                 doc_id,
                 doc_number,
@@ -180,19 +180,19 @@ module.exports = {
                 isSecure
             FROM document_master 
             WHERE docStatus = 1 AND doc_slno = ?`,
-            [id],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return callBack(error);
-                }
-                return callBack(null, results);
-            }
-        );
-    },
-    getDocMasterLikeName: (name, callBack) => {
-        mysqlpool.query(
-            `SELECT 
+      [id],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  getDocMasterLikeName: (name, callBack) => {
+    mysqlpool.query(
+      `SELECT 
                 doc_slno,
                 doc_id,
                 doc_number,
@@ -214,61 +214,83 @@ module.exports = {
             FROM document_master 
             WHERE docStatus = 1 
             AND doc_name LIKE ?`,
-            [`%${name}%`],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return callBack(error);
-                }
-                return callBack(null, results);
-            }
-        );
-    },
-    checkDocNameDuplicate: (data, callBack) => {
-        mysqlpool.query(
-            `SELECT doc_slno FROM document_master WHERE doc_name = ?`,
-            [data],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return callBack(error);
-                }
-                return callBack(null, results);
-            }
-        );
-    },
-    inCrementDocSerialNumber: (callBack) => {
-        mysqlpool.query(
-            `UPDATE serial_number SET number = number +1 WHERE type = 1`,
-            [],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return callBack(error);
-                }
-                return callBack(null, results);
-            }
-        );
-    },
-    insertDocDetl: (data) => data?.map((item) => new Promise((resolve, reject) => {
-        mysqlpool.query(
+      [`%${name}%`],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  checkDocNameDuplicate: (data, callBack) => {
+    mysqlpool.query(
+      `SELECT doc_slno FROM document_master WHERE doc_name = ?`,
+      [data],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  inCrementDocSerialNumber: (callBack) => {
+    mysqlpool.query(
+      `UPDATE serial_number SET number = number +1 WHERE type = 1`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  insertDocDetl: (data) =>
+    data?.map(
+      (item) =>
+        new Promise((resolve, reject) => {
+          mysqlpool.query(
             `INSERT INTO document_detl (doc_id,doc_number,originalname,mimetype,filename) VALUES (?,?,?,?,?)`,
             [
-                item.docID,
-                item.docNumber,
-                item.originalname,
-                item.mimetype,
-                item.filename
+              item.docID,
+              item.docNumber,
+              item.originalname,
+              item.mimetype,
+              item.filename,
             ],
             (error, results, fields) => {
-                if (error) {
-                    logger.error(error);
-                    return reject(error);
-                }
-                return resolve(results);
+              if (error) {
+                logger.error(error);
+                return reject(error);
+              }
+              return resolve(results);
             }
-        );
-    }))
-
-
+          );
+        })
+    ),
+  getDocDetlinfo: (id, callBack) => {
+    mysqlpool.query(
+      `SELECT 
+                doc_id,
+                doc_number,
+                originalname,
+                mimetype,
+                filename
+            FROM document_detl
+            WHERE doc_id = ?`,
+      [id],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
 };

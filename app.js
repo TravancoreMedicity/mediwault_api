@@ -34,11 +34,9 @@ const institutionType = require("./api/InstituteTyeMaster/instituteType.route");
 const institutionMaster = require("./api/InstitutionMaster/institutionMaster.route");
 const courseType = require("./api/courseType/courseType.route");
 const courseMaster = require("./api/courseMaster/courseMater.route");
-
 const docMaster = require("./api/docMaster/docMaster.route");
 
 app.use("/api/docMaster", docMaster);
-
 app.get("/api/generateOTP/:id", generateOTP); // generate OTP function
 app.use("/api/user", userRegistration);
 app.use("/api/selectComponets", selectCmp);
