@@ -9,6 +9,7 @@ const {
   getDocNonSecure,
   getDocSecureOnly,
   getDocDetlinfo,
+  getDocTypeCount,
 } = require("./docMaster.controller");
 
 router.post("/insertDocMaster", verifyToken, insertDocMaster);
@@ -18,5 +19,6 @@ router.get("/getDocMasterLikeName/:name", verifyToken, getDocMasterLikeName);
 router.get("/getDocNonSecure", verifyToken, getDocNonSecure);
 router.get("/getDocSecureOnly", verifyToken, getDocSecureOnly);
 router.get("/getDocDetl/:id", verifyToken, getDocDetlinfo);
+router.get("/getDocTypeCount", verifyToken, getDocTypeCount);
 
 module.exports = router;

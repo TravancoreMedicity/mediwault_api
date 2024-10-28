@@ -293,4 +293,24 @@ module.exports = {
       }
     );
   },
+  getDocTypeCount: (callBack) => {
+    mysqlpool.query(
+      `SELECT 
+        sum(M.doc_slno) file,
+          M.doc_type,
+          D.doc_type_master_name
+      FROM document_master M
+      LEFT JOIN doc_type_master D ON D.doc_type_slno = M.doc_type
+      WHERE M.docStatus = 1
+      GROUP BY M.doc_type`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
 };

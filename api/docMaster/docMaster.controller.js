@@ -11,6 +11,7 @@ const {
   inCrementDocSerialNumber,
   insertDocDetl,
   getDocDetlinfo,
+  getDocTypeCount,
 } = require("./docMaster.service");
 
 const { uploadFile } = require("../multer.config/FileuploadConfig");
@@ -27,12 +28,10 @@ module.exports = {
         if (err instanceof multer.MulterError) {
           // Multer error File too large. Max size is 10MB.
           if (err.code === "LIMIT_FILE_SIZE") {
-            return res
-              .status(200)
-              .json({
-                success: 0,
-                message: "File too large. Max size is 10MB.",
-              });
+            return res.status(200).json({
+              success: 0,
+              message: "File too large. Max size is 10MB.",
+            });
           }
           // Handle other multer errors here as needed
           return res.status(200).json({ success: 0, message: err.message });
@@ -46,12 +45,10 @@ module.exports = {
         }
 
         // Unknown error
-        return res
-          .status(200)
-          .json({
-            success: 0,
-            message: "An unknown error occurred during file upload.",
-          });
+        return res.status(200).json({
+          success: 0,
+          message: "An unknown error occurred during file upload.",
+        });
       }
 
       const body = JSON.parse(JSON.parse(JSON.stringify(req.body))?.postData);
@@ -201,6 +198,22 @@ module.exports = {
   getDocDetlinfo: (req, res) => {
     const id = req.params.id;
     getDocDetlinfo(id, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+  getDocTypeCount: (req, res) => {
+    getDocTypeCount((err, results) => {
       if (err) {
         logger.error(err);
         return res.status(500).json({
