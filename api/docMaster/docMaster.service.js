@@ -94,26 +94,30 @@ module.exports = {
   getDocSecureOnly: (callBack) => {
     mysqlpool.query(
       `SELECT 
-                doc_slno,
-                doc_id,
-                doc_number,
-                doc_name,
-                doc_desc,
-                doc_type,
-                doc_sub_type,
-                institute,
-                course,
-                category,
-                sub_category,
-                group_mast,
-                doc_date,
-                doc_ver_date,
-                doc_exp_start,
-                doc_exp_end,
-                isRequiredExp,
-                isSecure
-            FROM document_master 
-            WHERE docStatus = 1 AND isSecure = 1`,
+          D.doc_slno,
+          D.doc_id,
+          D.doc_number,
+          D.doc_name,
+          D.doc_desc,
+          T.doc_type_master_name,
+          S.doc_sub_type_name,
+          I.institution_name,
+          C.course_name,
+          A.category_name,
+          M.subcat_name,
+          G.group_name,
+          D.doc_date,
+          D.doc_ver_date,
+          D.isSecure
+      FROM document_master D
+      LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
+      LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+      LEFT JOIN institution_master I ON I.institution_slno = D.institute
+      LEFT JOIN course_master C ON C.course_slno = D.course
+      LEFT JOIN doc_category_master A ON A.cat_slno = D.category
+      LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
+      LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+      WHERE D.docStatus = 1 ORDER BY D.doc_slno DESC LIMIT 20`,
       [],
       (error, results, fields) => {
         if (error) {
@@ -127,26 +131,30 @@ module.exports = {
   getDocNonSecure: (callBack) => {
     mysqlpool.query(
       `SELECT 
-                doc_slno,
-                doc_id,
-                doc_number,
-                doc_name,
-                doc_desc,
-                doc_type,
-                doc_sub_type,
-                institute,
-                course,
-                category,
-                sub_category,
-                group_mast,
-                doc_date,
-                doc_ver_date,
-                doc_exp_start,
-                doc_exp_end,
-                isRequiredExp,
-                isSecure
-            FROM document_master 
-            WHERE docStatus = 1 AND isSecure = 0`,
+          D.doc_slno,
+          D.doc_id,
+          D.doc_number,
+          D.doc_name,
+          D.doc_desc,
+          T.doc_type_master_name,
+          S.doc_sub_type_name,
+          I.institution_name,
+          C.course_name,
+          A.category_name,
+          M.subcat_name,
+          G.group_name,
+          D.doc_date,
+          D.doc_ver_date,
+          D.isSecure
+      FROM document_master D
+      LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
+      LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+      LEFT JOIN institution_master I ON I.institution_slno = D.institute
+      LEFT JOIN course_master C ON C.course_slno = D.course
+      LEFT JOIN doc_category_master A ON A.cat_slno = D.category
+      LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
+      LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+      WHERE D.docStatus = 1 AND D.isSecure = 0 ORDER BY D.doc_slno DESC LIMIT 20`,
       [],
       (error, results, fields) => {
         if (error) {
@@ -190,31 +198,71 @@ module.exports = {
       }
     );
   },
-  getDocMasterLikeName: (name, callBack) => {
+  getDocMasterLikeName: (id, callBack) => {
     mysqlpool.query(
       `SELECT 
-                doc_slno,
-                doc_id,
-                doc_number,
-                doc_name,
-                doc_desc,
-                doc_type,
-                doc_sub_type,
-                institute,
-                course,
-                category,
-                sub_category,
-                group_mast,
-                doc_date,
-                doc_ver_date,
-                doc_exp_start,
-                doc_exp_end,
-                isRequiredExp,
-                isSecure
-            FROM document_master 
-            WHERE docStatus = 1 
-            AND doc_name LIKE ?`,
-      [`%${name}%`],
+        D.doc_slno,
+        D.doc_id,
+        D.doc_number,
+        D.doc_name,
+        D.doc_desc,
+        T.doc_type_master_name,
+        S.doc_sub_type_name,
+        I.institution_name,
+        C.course_name,
+        A.category_name,
+        M.subcat_name,
+        G.group_name,
+        D.doc_date,
+        D.doc_ver_date,
+        D.isSecure
+    FROM document_master D
+    LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
+    LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+    LEFT JOIN institution_master I ON I.institution_slno = D.institute
+    LEFT JOIN course_master C ON C.course_slno = D.course
+    LEFT JOIN doc_category_master A ON A.cat_slno = D.category
+    LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
+    LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+    WHERE D.docStatus = 1 AND D.doc_name LIKE ? ORDER BY D.doc_slno DESC LIMIT 20`,
+      [`%${id}%`],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  getDocMasterLikeNameNonSecureOnly: (id, callBack) => {
+    mysqlpool.query(
+      `SELECT 
+        D.doc_slno,
+        D.doc_id,
+        D.doc_number,
+        D.doc_name,
+        D.doc_desc,
+        T.doc_type_master_name,
+        S.doc_sub_type_name,
+        I.institution_name,
+        C.course_name,
+        A.category_name,
+        M.subcat_name,
+        G.group_name,
+        D.doc_date,
+        D.doc_ver_date,
+        D.isSecure
+    FROM document_master D
+    LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
+    LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+    LEFT JOIN institution_master I ON I.institution_slno = D.institute
+    LEFT JOIN course_master C ON C.course_slno = D.course
+    LEFT JOIN doc_category_master A ON A.cat_slno = D.category
+    LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
+    LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+    WHERE D.docStatus = 1 AND D.doc_name LIKE ? AND D.isSecure = 0 ORDER BY D.doc_slno DESC LIMIT 20`,
+      [`%${id}%`],
       (error, results, fields) => {
         if (error) {
           logger.error(error);
@@ -296,13 +344,25 @@ module.exports = {
   getDocTypeCount: (callBack) => {
     mysqlpool.query(
       `SELECT 
-        sum(M.doc_slno) file,
-          M.doc_type,
-          D.doc_type_master_name
-      FROM document_master M
-      LEFT JOIN doc_type_master D ON D.doc_type_slno = M.doc_type
-      WHERE M.docStatus = 1
-      GROUP BY M.doc_type`,
+          D.doc_type_master_name,
+          COUNT(M.doc_slno) COUNT
+        FROM doc_type_master D
+        LEFT JOIN document_master M ON D.doc_type_slno = M.doc_type AND M.docStatus = 1
+        WHERE D.doc_type_master_status = 1 
+        GROUP BY D.doc_type_master_name`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  getSearchData: (sql, callBack) => {
+    mysqlpool.query(
+      sql,
       [],
       (error, results, fields) => {
         if (error) {

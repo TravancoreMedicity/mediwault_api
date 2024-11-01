@@ -12,6 +12,8 @@ const {
   insertDocDetl,
   getDocDetlinfo,
   getDocTypeCount,
+  getDocMasterLikeNameNonSecureOnly,
+  getSearchData
 } = require("./docMaster.service");
 
 const { uploadFile } = require("../multer.config/FileuploadConfig");
@@ -147,8 +149,25 @@ module.exports = {
     });
   },
   getDocMasterLikeName: (req, res) => {
-    const body = req.body;
-    getDocMasterLikeName(body, (err, results) => {
+    const id = req.params.id;
+    getDocMasterLikeName(id, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+  getDocMasterLikeNameNonSecureOnly: (req, res) => {
+    const id = req.params.id;
+    getDocMasterLikeNameNonSecureOnly(id, (err, results) => {
       if (err) {
         logger.error(err);
         return res.status(500).json({
@@ -227,5 +246,79 @@ module.exports = {
         data: results,
       });
     });
+  },
+  getSearchData: (req, res) => {
+    const state = req.body
+
+    const ObjToArray = [
+      { value: state.docType, sql: `AND D.doc_type = ${state.docType}` },
+      { value: state.subType, sql: `AND D.doc_sub_type = ${state.subType}` },
+      { value: state.category, sql: `AND D.category = ${state.category}` },
+      { value: state.subCategory, sql: `AND D.sub_category = ${state.subCategory}` },
+      { value: state.group, sql: `AND D.group_mast = ${state.group}` },
+      { value: state.institute, sql: `AND D.institute = ${state.institute}` },
+      { value: state.course, sql: `AND D.course = ${state.course}` },
+      { value: state.docNumber, sql: `AND D.doc_id = ${state.docNumber}` },
+    ]
+
+    const array = ObjToArray?.filter(e => e.value !== 0 && e.value !== undefined && e.value !== null)?.map(e => `${e.sql}`).join(" ")
+
+    if (ObjToArray?.filter(e => e.value !== 0 && e.value !== undefined && e.value !== null)?.length === 0) {
+      return res.status(200).json({
+        success: 2,
+        message: "no data",
+      });
+    } else {
+      const sql = `SELECT 
+                    D.doc_slno,
+                    D.doc_id,
+                    D.doc_number,
+                    D.doc_name,
+                    D.doc_desc,
+                    T.doc_type_master_name,
+                    S.doc_sub_type_name,
+                    I.institution_name,
+                    C.course_name,
+                    A.category_name,
+                    M.subcat_name,
+                    G.group_name,
+                    D.doc_date,
+                    D.doc_ver_date,
+                    D.isSecure
+                FROM document_master D
+                    LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
+                    LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+                    LEFT JOIN institution_master I ON I.institution_slno = D.institute
+                    LEFT JOIN course_master C ON C.course_slno = D.course
+                    LEFT JOIN doc_category_master A ON A.cat_slno = D.category
+                    LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
+                    LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+                WHERE D.docStatus = 1 ${array === "" ? 'ORDER BY D.doc_slno DESC' : array}`
+
+      getSearchData(sql, (err, results) => {
+
+        if (err) {
+          logger.error(err);
+          return res.status(500).json({
+            success: 0,
+            message: "Database connection error",
+          });
+        }
+
+        if (results.length === 0) {
+          return res.status(200).json({
+            success: 2,
+            message: "no data",
+          });
+        }
+
+        return res.status(200).json({
+          success: 1,
+          message: "success",
+          data: results,
+        });
+      });
+    }
+
   },
 };
