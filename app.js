@@ -2,18 +2,42 @@
 require("dotenv").config();
 
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const logger = require("./logger/logger");
 const mysql = require("mysql2/promise");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
+const morgan = require('morgan');
 
-app.use(cors());
+
+const cookieParser = require("cookie-parser");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+
+const app = express();
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://192.168.22.170:3000", // in Production change the URL Name <-- remember this
+    credentials: true,
+  },
+});
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(
+  cors({
+    origin: "http://192.168.22.170:3000",
+    credentials: true,
+  })
+);
+
+//for log the error
+app.use(morgan('dev'));
+//for log the error in console log file
 app.use((err, req, res, next) => {
   logger.error(`Unhandled error: ${err.message}`);
   res.status(500).json({

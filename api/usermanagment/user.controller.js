@@ -16,6 +16,7 @@ const {
 
 const { addHours, format } = require('date-fns');
 const logger = require('../../logger/logger');
+const { generateAccessToken, generateRefreshToken } = require('../helperFunction/HelperFunction');
 
 
 module.exports = {
@@ -221,25 +222,36 @@ module.exports = {
                 const userData = results[0]
                 const { user_slno, name, login_type } = userData
 
-                const token = jwt.sign(results[0], process.env.TOKEN_SECRET, {
-                    expiresIn: "2h"
-                });
+                const accessToken = generateAccessToken(userData);
+                const refreshToken = generateRefreshToken(user_slno);
+
+                // const token = jwt.sign(userData, process.env.ACCESS_TOKEN_SECRET, {
+                //     expiresIn: "10m"
+                // });
+
 
                 const expiresIn = addHours(new Date(), 2);
 
                 const returnData = {
                     user_slno,
                     name,
-                    token,
+                    accessToken,
                     login_type,
                     tokenValidity: expiresIn
                 }
 
-                return res.status(200).json({
+                res.cookie("refreshToken", refreshToken, {
+                    httpOnly: true,
+                    // secure: true,
+                    maxAge: 300000,
+                    sameSite: "strict",
+                });
+                res.json({
                     success: 2,
                     userInfo: JSON.stringify(returnData),
                     message: "OTP verified successfully"
                 });
+
             }
         })
     }
