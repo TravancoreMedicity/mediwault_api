@@ -46,6 +46,9 @@ app.use((err, req, res, next) => {
   });
 });
 
+//VALIDATE TOKEN
+
+
 const { generateOTP } = require("./api/usermanagment/user.controller");
 
 const userRegistration = require("./api/usermanagment/user.route");
@@ -60,9 +63,11 @@ const institutionMaster = require("./api/InstitutionMaster/institutionMaster.rou
 const courseType = require("./api/courseType/courseType.route");
 const courseMaster = require("./api/courseMaster/courseMater.route");
 const docMaster = require("./api/docMaster/docMaster.route");
+const { validateToken } = require("./api/tokenValidation/tokenValidation");
 
-app.use("/api/docMaster", docMaster);
 app.get("/api/generateOTP/:id", generateOTP); // generate OTP function
+app.get("/api/validateToken", validateToken);
+app.use("/api/docMaster", docMaster);
 app.use("/api/user", userRegistration);
 app.use("/api/selectComponets", selectCmp);
 app.use("/api/documentTypeMaster", docTypeMaster);
@@ -98,6 +103,23 @@ app.post("refreshtoken", (req, res) => {
     res.json({ accessToken: newAccessToken });
   });
 });
+
+
+
+// const validateToken = (req, res, next) => {
+//   const token = req.headers["authorization"];
+//   if (!token) {
+//     return res.status(401).json({ message: "No token provided" });
+//   }
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+//     if (err) {
+//       return res.status(403).json({ message: "Invalid token" });
+//     }
+//     req.user = user;
+//     next();
+//   });
+// };
+
 
 const port = process.env.PORT || 58888;
 
