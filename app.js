@@ -7,8 +7,7 @@ const logger = require("./logger/logger");
 const mysql = require("mysql2/promise");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
-const morgan = require('morgan');
-
+const morgan = require("morgan");
 
 const cookieParser = require("cookie-parser");
 const { createServer } = require("http");
@@ -19,7 +18,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://192.168.22.170:3000", // in Production change the URL Name <-- remember this
+    origin: "http://localhost:3000", // in Production change the URL Name <-- remember this
     credentials: true,
   },
 });
@@ -30,13 +29,15 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "http://192.168.22.170:3000",
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
 
+// General error handling middleware
+
 //for log the error
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 //for log the error in console log file
 app.use((err, req, res, next) => {
   logger.error(`Unhandled error: ${err.message}`);
@@ -74,7 +75,29 @@ app.use("/api/institutionMaster", institutionMaster);
 app.use("/api/courseType", courseType);
 app.use("/api/courseMaster", courseMaster);
 
-// General error handling middleware
+// REFRESH TOKEN GENERATION
+
+app.post("refreshtoken", (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  // check the refresh token with database user saved token for validaion
+  if (!refreshTokens.includes(refreshToken)) {
+    // change this code with to get token from database and validate
+    return res.status(403).json({ message: "Invalid refresh token" });
+  }
+
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    const newAccessToken = generateAccessToken({
+      id: user.id,
+      username: user.username,
+    });
+    res.json({ accessToken: newAccessToken });
+  });
+});
 
 const port = process.env.PORT || 58888;
 
