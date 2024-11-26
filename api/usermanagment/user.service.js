@@ -157,5 +157,38 @@ module.exports = {
                 }
                 return callBack(null, results)
             })
+    },
+    insertRefreshToken: (data, callBack) => {
+        mysqlpool.query(
+            `UPDATE user 
+                SET token = ? ,
+                sessionid = ? 
+                WHERE user_slno = ? `,
+            [
+                data.refresh_token,
+                data.user_slno,
+                data.user_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    getRefershToken: async (id, callBack) => {
+        mysqlpool.query(
+            `SELECT token,sessionid FROM user WHERE user_slno = ?`,
+            [
+                id
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
     }
 }

@@ -11,7 +11,9 @@ const {
     mobileExist,
     emailExist,
     insertOTP,
-    verifyOTP
+    verifyOTP,
+    insertRefreshToken,
+    getRefershToken
 } = require('./user.service');
 
 const { addHours, format } = require('date-fns');
@@ -203,6 +205,7 @@ module.exports = {
     },
     verifyOTPandLogin: async (req, res) => {
         const body = req.body
+
         verifyOTP(body, (error, results) => {
             if (error) {
                 logger.error(error)
@@ -225,34 +228,88 @@ module.exports = {
                 const accessToken = generateAccessToken(userData);
                 const refreshToken = generateRefreshToken(user_slno);
 
-                // const token = jwt.sign(userData, process.env.ACCESS_TOKEN_SECRET, {
-                //     expiresIn: "10m"
-                // });
+                // insert the refresh token
+                insertRefreshToken({ user_slno, refresh_token: refreshToken }, (error, results) => {
 
+                    if (error) {
+                        logger.error(error)
+                        return res.status(500).json({
+                            success: 0,
+                            message: "Database connection error"
+                        });
+                    }
 
-                const expiresIn = addHours(new Date(), 2);
+                    if (results) {
 
-                const returnData = {
-                    user_slno,
-                    name,
-                    accessToken,
-                    login_type,
-                    tokenValidity: expiresIn
-                }
+                        const returnData = {
+                            user_slno,
+                            name,
+                            accessToken,
+                            login_type
+                        }
 
-                res.cookie("refreshToken", refreshToken, {
-                    httpOnly: true,
-                    // secure: true,
-                    maxAge: 300000,
-                    sameSite: "strict",
-                });
-                res.json({
-                    success: 2,
-                    userInfo: JSON.stringify(returnData),
-                    message: "OTP verified successfully"
-                });
+                        res.cookie("accessToken", accessToken, {
+                            httpOnly: true,
+                            // secure: true,
+                            // maxAge: 900000, // 15 min       
+                            maxAge: 60000, // 1 min       
+                            sameSite: "strict",
+                        });
 
+                        // res.cookie("refreshToken", refreshToken, {
+                        //     httpOnly: true,
+                        //     secure: true,
+                        //     maxAge: 86400000, // 24 hour
+                        //     sameSite: "strict",
+                        // });
+
+                        res.json({
+                            success: 2,
+                            userInfo: JSON.stringify(returnData),
+                            message: "OTP verified successfully"
+                        });
+
+                    }
+                })
             }
         })
+    },
+    getRefershToken: (req, res) => {
+        const id = req.params.id
+        getRefershToken(id, (error, results) => {
+            if (error) {
+                logger.error(error)
+                return res.status(403).json({ message: "Invalid refresh token" });
+            }
+            if (results.length === 0) {
+                return res.status(403).json({ message: "Invalid refresh token" });
+            }
+            if (results.length > 0) {
+
+                // console.log(results[0].token)
+                const refreshToken = results[0].token;
+
+                jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+
+                    if (err) {
+                        return res.status(403).json({ message: "Invalid refresh token" });
+                    }
+
+                    const newAccessToken = generateAccessToken({
+                        id: id
+                    });
+                    // console.log(newAccessToken)
+                    res.cookie("accessToken", newAccessToken, {
+                        httpOnly: true,
+                        secure: true,
+                        // maxAge: 900000, // 15 min       
+                        maxAge: 60000, // 1 min       
+                        sameSite: "strict",
+                    });
+                });
+            }
+
+        })
     }
+
 }

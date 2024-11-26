@@ -24,8 +24,8 @@ const io = new Server(httpServer, {
 });
 
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use(
   cors({
@@ -79,46 +79,6 @@ app.use("/api/instituteType", institutionType);
 app.use("/api/institutionMaster", institutionMaster);
 app.use("/api/courseType", courseType);
 app.use("/api/courseMaster", courseMaster);
-
-// REFRESH TOKEN GENERATION
-
-app.post("refreshtoken", (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-
-  // check the refresh token with database user saved token for validaion
-  if (!refreshTokens.includes(refreshToken)) {
-    // change this code with to get token from database and validate
-    return res.status(403).json({ message: "Invalid refresh token" });
-  }
-
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid refresh token" });
-    }
-
-    const newAccessToken = generateAccessToken({
-      id: user.id,
-      username: user.username,
-    });
-    res.json({ accessToken: newAccessToken });
-  });
-});
-
-
-
-// const validateToken = (req, res, next) => {
-//   const token = req.headers["authorization"];
-//   if (!token) {
-//     return res.status(401).json({ message: "No token provided" });
-//   }
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-//     if (err) {
-//       return res.status(403).json({ message: "Invalid token" });
-//     }
-//     req.user = user;
-//     next();
-//   });
-// };
 
 
 const port = process.env.PORT || 58888;

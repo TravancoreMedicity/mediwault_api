@@ -4,10 +4,12 @@ const jwt = require('jsonwebtoken')
 const logger = require('../../logger/logger')
 module.exports = {
     verifyToken: (req, res, next) => {
-        let token = req.get('authorization')
+        // let token = req.get('authorization')
+        const token = req.cookies.accessToken;
+
         if (token) {
             // Remove Bearer from string
-            token = token.slice(7);
+            // token = token.slice(7);
             jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
                 if (err) {
                     logger.error(err)
@@ -29,14 +31,14 @@ module.exports = {
         }
     },
     validateToken: (req, res) => {
-        let token = req.headers["authorization"];
-
+        // let token = req.headers["authorization"];
+        const token = req.cookies.accessToken;
         if (!token) {
             return res.status(101).json({ isValidToken: false, message: "No token provided" });
         }
 
         if (token) {
-            token = token.slice(7);
+            // token = token.slice(7);
             jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
                 if (err) {
                     return res.status(102).json({ isValidToken: false, message: "Invalid token" });
