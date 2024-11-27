@@ -47,7 +47,7 @@ app.use((err, req, res, next) => {
 });
 
 //VALIDATE TOKEN
-
+const activeUsers = {};
 
 const { generateOTP } = require("./api/usermanagment/user.controller");
 
@@ -79,6 +79,33 @@ app.use("/api/instituteType", institutionType);
 app.use("/api/institutionMaster", institutionMaster);
 app.use("/api/courseType", courseType);
 app.use("/api/courseMaster", courseMaster);
+
+// io.on("connection", (socket) => {
+
+//   socket.on("login", ({ userId }) => {
+//     if (activeUsers[userId]) {
+//       // Disconnect previous client if the user is already logged in
+//       const previousSocket = activeUsers[userId];
+//       previousSocket.emit("multiple-login", "You have been logged out due to login from another device.");
+//       previousSocket.disconnect();
+//     }
+
+//     // Store the current user and socket
+//     activeUsers[userId] = socket;
+
+//     console.log(`User ${userId} logged in with socket ${socket.id}`);
+//   });
+
+//   socket.on("disconnect", () => {
+//     // Remove the user from active users on disconnection
+//     for (const [userId, userSocket] of Object.entries(activeUsers)) {
+//       if (userSocket.id === socket.id) {
+//         delete activeUsers[userId];
+//         console.log(`User ${userId} disconnected`);
+//       }
+//     }
+//   });
+// });
 
 
 const port = process.env.PORT || 58888;

@@ -190,5 +190,19 @@ module.exports = {
                 }
                 return callBack(null, results)
             })
+    },
+    deleteRefreshToken: (id, callBack) => {
+        mysqlpool.query(
+            `UPDATE user SET token = null, sessionid = null WHERE user_slno = ?`,
+            [
+                id
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
     }
 }
