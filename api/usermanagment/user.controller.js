@@ -256,7 +256,7 @@ module.exports = {
                             res.cookie("accessToken", accessToken, {
                                 httpOnly: true,
                                 secure: true,
-                                maxAge: 900000, // 15 min
+                                maxAge: process.env.COOKIE_TIME, // 15 min
                                 sameSite: "strict",
                             });
 
@@ -279,11 +279,28 @@ module.exports = {
 
             if (error) {
                 logger.error(error);
-                return res.status(403).json({ message: "Invalid refresh token" });
+                deleteRefreshToken(id, (error, results) => {
+                    if (error) {
+                        logger.error(error);
+                        res.clearCookie("accessToken");
+                        return res.status(200).json({ message: "Invalid refresh token" });
+                    }
+                    res.clearCookie("accessToken");
+                    return res.status(200).json({ message: "Invalid refresh token" });
+                })
             }
 
             if (results.length === 0) {
-                return res.status(403).json({ message: "Invalid refresh token" });
+                deleteRefreshToken(id, (error, results) => {
+                    if (error) {
+                        logger.error(error);
+                        res.clearCookie("accessToken");
+                        return res.status(200).json({ message: "Invalid refresh token" });
+                    }
+                    res.clearCookie("accessToken");
+                    return res.status(200).json({ message: "Invalid refresh token" });
+                })
+                // return res.status(403).json({ message: "Invalid refresh token" });
             }
 
             if (results.length > 0) {
@@ -299,6 +316,7 @@ module.exports = {
                             deleteRefreshToken(id, (error, results) => {
                                 if (error) {
                                     logger.error(error);
+                                    res.clearCookie("accessToken");
                                     return res.status(200).json({ message: "Invalid refresh token" });
                                 }
                                 res.clearCookie("accessToken");
@@ -310,7 +328,7 @@ module.exports = {
                             res.cookie("accessToken", newAccessToken, {
                                 httpOnly: true,
                                 secure: true,
-                                maxAge: 900000, // 15 min
+                                maxAge: process.env.COOKIE_TIME, // 15 min
                                 sameSite: "strict",
                             });
                             res.json({ message: "revalidated" });
@@ -320,4 +338,16 @@ module.exports = {
             }
         });
     },
+    logOutFunctionality: (req, res) => {
+        const id = req.params.id
+        deleteRefreshToken(id, (error, results) => {
+            if (error) {
+                logger.error(error);
+                res.clearCookie("accessToken");
+                return res.status(200).json({ message: "Invalid refresh token" });
+            }
+            res.clearCookie("accessToken");
+            return res.status(200).json({ message: "Invalid refresh token" });
+        })
+    }
 };

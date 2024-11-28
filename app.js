@@ -10,15 +10,20 @@ const axios = require("axios");
 const morgan = require("morgan");
 
 const cookieParser = require("cookie-parser");
-const { createServer } = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
+const port = process.env.PORT || 58888;
 
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
+const expressServer = app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+const io = new Server(expressServer, {
   cors: {
-    origin: "http://localhost:3000", // in Production change the URL Name <-- remember this
+    origin: process.env.NODE_ENV === "development" ?
+      ["http://localhost:3000", "http://127.0.0.1:3000", "http://192.168.22.170:3000"] :
+      ["http://localhost:3000", "http://127.0.0.1:3000", "http://192.168.22.170:3000"],
     credentials: true,
   },
 });
@@ -80,36 +85,39 @@ app.use("/api/institutionMaster", institutionMaster);
 app.use("/api/courseType", courseType);
 app.use("/api/courseMaster", courseMaster);
 
+
 // io.on("connection", (socket) => {
-
-//   socket.on("login", ({ userId }) => {
-//     if (activeUsers[userId]) {
-//       // Disconnect previous client if the user is already logged in
-//       const previousSocket = activeUsers[userId];
-//       previousSocket.emit("multiple-login", "You have been logged out due to login from another device.");
-//       previousSocket.disconnect();
-//     }
-
-//     // Store the current user and socket
-//     activeUsers[userId] = socket;
-
-//     console.log(`User ${userId} logged in with socket ${socket.id}`);
+//   console.log(`user connected ${socket.id} `);
+//   socket.on('login', (arg) => {
+//     console.log(arg); // 'world'
 //   });
+// })
 
-//   socket.on("disconnect", () => {
-//     // Remove the user from active users on disconnection
-//     for (const [userId, userSocket] of Object.entries(activeUsers)) {
-//       if (userSocket.id === socket.id) {
-//         delete activeUsers[userId];
-//         console.log(`User ${userId} disconnected`);
-//       }
-//     }
-//   });
-// });
+io.on("connection", (socket) => {
 
+  socket.on("login", ({ userId }) => {
+    if (activeUsers[userId]) {
+      // Disconnect previous client if the user is already logged in
+      const previousSocket = activeUsers[userId];
+      previousSocket.emit("multiple-login", "You have been logged out due to login from another device.");
+      previousSocket.disconnect();
+    }
 
-const port = process.env.PORT || 58888;
+    // Store the current user and socket
+    activeUsers[userId] = socket;
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`User ${userId} logged in with socket ${socket.id}`);
+  });
+
+  socket.on("disconnect", () => {
+    // Remove the user from active users on disconnection
+    for (const [userId, userSocket] of Object.entries(activeUsers)) {
+      if (userSocket.id === socket.id) {
+        delete activeUsers[userId];
+        console.log(`User ${userId} disconnected`);
+      }
+    }
+  });
 });
+
+

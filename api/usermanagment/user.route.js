@@ -9,6 +9,7 @@ const {
     getAllUser,
     verifyOTPandLogin,
     getRefershToken,
+    logOutFunctionality
 } = require('./user.controller');
 
 router.post('/insertUser', verifyToken, insertUser);
@@ -18,6 +19,7 @@ router.get('/getUser/:id', verifyToken, getUser);
 router.get('/getAllUser', verifyToken, getAllUser);
 router.post('/verifyOTP', verifyOTPandLogin);
 router.get('/getRefershToken/:id', getRefershToken)
+router.get('/logout/:id', logOutFunctionality)
 
 
 module.exports = router
