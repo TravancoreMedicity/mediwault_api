@@ -283,10 +283,10 @@ module.exports = {
                     if (error) {
                         logger.error(error);
                         res.clearCookie("accessToken");
-                        return res.status(200).json({ message: "Invalid refresh token" });
+                        return res.status(403).json({ message: "Invalid refresh token" });
                     }
                     res.clearCookie("accessToken");
-                    return res.status(200).json({ message: "Invalid refresh token" });
+                    return res.status(403).json({ message: "Invalid refresh token" });
                 })
             }
 
@@ -295,10 +295,10 @@ module.exports = {
                     if (error) {
                         logger.error(error);
                         res.clearCookie("accessToken");
-                        return res.status(200).json({ message: "Invalid refresh token" });
+                        return res.status(403).json({ message: "Invalid refresh token" });
                     }
                     res.clearCookie("accessToken");
-                    return res.status(200).json({ message: "Invalid refresh token" });
+                    return res.status(403).json({ message: "Invalid refresh token" });
                 })
                 // return res.status(403).json({ message: "Invalid refresh token" });
             }
@@ -317,10 +317,10 @@ module.exports = {
                                 if (error) {
                                     logger.error(error);
                                     res.clearCookie("accessToken");
-                                    return res.status(200).json({ message: "Invalid refresh token" });
+                                    return res.status(403).json({ message: "Invalid refresh token" });
                                 }
                                 res.clearCookie("accessToken");
-                                return res.status(200).json({ message: "Invalid refresh token" });
+                                return res.status(403).json({ message: "Invalid refresh token" });
                             })
 
                         } else {
@@ -341,6 +341,8 @@ module.exports = {
     logOutFunctionality: (req, res) => {
         const id = req.params.id
         deleteRefreshToken(id, (error, results) => {
+            console.log(results)
+            console.log(error)
             if (error) {
                 logger.error(error);
                 res.clearCookie("accessToken");
