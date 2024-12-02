@@ -14,7 +14,8 @@ const {
     verifyOTP,
     insertRefreshToken,
     getRefershToken,
-    deleteRefreshToken
+    deleteRefreshToken,
+    validateUserCredExcistOrNot
 } = require("./user.service");
 
 const { addHours, format } = require("date-fns");
@@ -28,54 +29,79 @@ module.exports = {
     insertUser: (req, res) => {
         const body = req.body;
 
-        mobileExist(body.mobile, (error, results) => {
+        validateUserCredExcistOrNot(body, (error, results) => {
             if (error) {
                 logger.error(error);
-                return res.status(500).json({
+                return res.status(200).json({
                     success: 0,
-                    message: "Database connection error",
+                    message: "Database connection error" + error,
                 });
             }
 
             if (results?.length > 0) {
                 return res.status(200).json({
                     success: 2,
-                    message: "Mobile number already exist",
+                    message: "User Credentials already exist",
                 });
             }
 
-            emailExist(body.email, (error, results) => {
+            insertUser(body, (error, results) => {
                 if (error) {
                     logger.error(error);
-                    return res.status(500).json({
-                        success: 0,
-                        message: "Database connection error",
-                    });
-                }
-
-                if (results?.length > 0) {
                     return res.status(200).json({
-                        success: 2,
-                        message: "Email already exist",
+                        success: 0,
+                        message: "Database connection error" + error,
                     });
                 }
-
-                if (results?.length === 0) {
-                    insertUser(body, (error, results) => {
-                        if (error) {
-                            return res.status(500).json({
-                                success: 0,
-                                message: "Database connection error",
-                            });
-                        }
-                        return res.status(200).json({
-                            success: 1,
-                            message: "User created successfully",
-                        });
-                    });
-                }
+                return res.status(200).json({
+                    success: 1,
+                    message: "User created successfully",
+                });
             });
-        });
+        })
+
+
+
+
+
+
+        // mobileExist(body.mobile, (error, results) => {
+        //     if (error) {
+        //         logger.error(error);
+        //         return res.status(500).json({
+        //             success: 0,
+        //             message: "Database connection error",
+        //         });
+        //     }
+
+        //     if (results?.length > 0) {
+        //         return res.status(200).json({
+        //             success: 2,
+        //             message: "Mobile number already exist",
+        //         });
+        //     }
+
+        //     emailExist(body.email, (error, results) => {
+        //         if (error) {
+        //             logger.error(error);
+        //             return res.status(500).json({
+        //                 success: 0,
+        //                 message: "Database connection error",
+        //             });
+        //         }
+
+        //         if (results?.length > 0) {
+        //             return res.status(200).json({
+        //                 success: 2,
+        //                 message: "Email already exist",
+        //             });
+        //         }
+
+        //         if (results?.length === 0) {
+
+        //         }
+        //     });
+        // });
     },
     editUser: (req, res) => {
         const body = req.body;
