@@ -9,7 +9,8 @@ const {
     getAllUser,
     verifyOTPandLogin,
     getRefershToken,
-    logOutFunctionality
+    logOutFunctionality,
+    userBasedLoginVerification
 } = require('./user.controller');
 
 router.post('/insertUser', verifyToken, insertUser);
@@ -20,6 +21,7 @@ router.get('/getAllUser', verifyToken, getAllUser);
 router.post('/verifyOTP', verifyOTPandLogin);
 router.get('/getRefershToken/:id', getRefershToken)
 router.get('/logout/:id', logOutFunctionality)
+router.post('/checkUserCres', userBasedLoginVerification)
 
 
 module.exports = router

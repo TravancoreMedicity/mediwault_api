@@ -2,6 +2,9 @@
 require("dotenv").config();
 const { default: axios } = require("axios");
 const jwt = require("jsonwebtoken");
+
+const { genSaltSync, hashSync, compareSync } = require("bcrypt");
+
 const {
     insertUser,
     editUser,
@@ -15,7 +18,8 @@ const {
     insertRefreshToken,
     getRefershToken,
     deleteRefreshToken,
-    validateUserCredExcistOrNot
+    validateUserCredExcistOrNot,
+    userBasedValidationCheck
 } = require("./user.service");
 
 const { addHours, format } = require("date-fns");
@@ -24,6 +28,8 @@ const {
     generateAccessToken,
     generateRefreshToken,
 } = require("../helperFunction/HelperFunction");
+const { encrypt, decrypt } = require("../EncryptionHandler/EncryptionHandler");
+const { validateUserLoginCheck } = require("./user.function");
 
 module.exports = {
     insertUser: (req, res) => {
@@ -45,7 +51,16 @@ module.exports = {
                 });
             }
 
-            insertUser(body, (error, results) => {
+            const salt = genSaltSync(10);
+            const passwordEncryption = hashSync(body.password, salt);
+
+            const bodtData = {
+                ...body,
+                password: passwordEncryption
+            }
+
+            insertUser(bodtData, (error, results) => {
+
                 if (error) {
                     logger.error(error);
                     return res.status(200).json({
@@ -59,49 +74,6 @@ module.exports = {
                 });
             });
         })
-
-
-
-
-
-
-        // mobileExist(body.mobile, (error, results) => {
-        //     if (error) {
-        //         logger.error(error);
-        //         return res.status(500).json({
-        //             success: 0,
-        //             message: "Database connection error",
-        //         });
-        //     }
-
-        //     if (results?.length > 0) {
-        //         return res.status(200).json({
-        //             success: 2,
-        //             message: "Mobile number already exist",
-        //         });
-        //     }
-
-        //     emailExist(body.email, (error, results) => {
-        //         if (error) {
-        //             logger.error(error);
-        //             return res.status(500).json({
-        //                 success: 0,
-        //                 message: "Database connection error",
-        //             });
-        //         }
-
-        //         if (results?.length > 0) {
-        //             return res.status(200).json({
-        //                 success: 2,
-        //                 message: "Email already exist",
-        //             });
-        //         }
-
-        //         if (results?.length === 0) {
-
-        //         }
-        //     });
-        // });
     },
     editUser: (req, res) => {
         const body = req.body;
@@ -205,6 +177,7 @@ module.exports = {
             if (results.length > 0) {
                 const otp = Math.floor(100000 + Math.random() * 900000);
                 insertOTP({ mobile: trimmedNumber, otp: otp }, (error, results) => {
+
                     if (error) {
                         logger.error(error);
                         return res.status(500).json({
@@ -213,23 +186,28 @@ module.exports = {
                         });
                     }
                     if (results) {
-                        axios
-                            .get(
-                                `https://sapteleservices.com/SMS_API/sendsms.php?username=Tmc_medicity&password=c9e780&sendername=TMDCTY&mobile=${mobileNumber}&template_id=1407162012178109509&message=Your+Medicity+App+OTP+code:+${otp}+DuHTEah22dE.Travancore+Medicity+.&routetype=1`
-                            )
-                            .then((response) => {
-                                return res.status(200).json({
-                                    success: 2,
-                                    message: "OTP sent successfully",
-                                });
-                            })
-                            .catch((error) => {
-                                logger.error(error);
-                                return res.status(200).json({
-                                    success: 3,
-                                    message: "Error in sending OTP,Please try again",
-                                });
-                            });
+                        return res.status(200).json({
+                            success: 2,
+                            message: "OTP sent successfully",
+                        });
+
+                        // axios
+                        //     .get(
+                        //         `https://sapteleservices.com/SMS_API/sendsms.php?username=Tmc_medicity&password=c9e780&sendername=TMDCTY&mobile=${mobileNumber}&template_id=1407162012178109509&message=Your+Medicity+App+OTP+code:+${otp}+DuHTEah22dE.Travancore+Medicity+.&routetype=1`
+                        //     )
+                        //     .then((response) => {
+                        //         return res.status(200).json({
+                        //             success: 2,
+                        //             message: "OTP sent successfully",
+                        //         });
+                        //     })
+                        //     .catch((error) => {
+                        //         logger.error(error);
+                        //         return res.status(200).json({
+                        //             success: 3,
+                        //             message: "Error in sending OTP,Please try again",
+                        //         });
+                        //     });
                     }
                 });
             }
@@ -238,7 +216,7 @@ module.exports = {
     verifyOTPandLogin: async (req, res) => {
         const body = req.body;
 
-        verifyOTP(body, (error, results) => {
+        verifyOTP(body, async (error, results) => {
             if (error) {
                 logger.error(error);
                 return res.status(500).json({
@@ -254,15 +232,53 @@ module.exports = {
             }
             if (results.length > 0) {
                 const userData = results[0];
-                const { user_slno, name, login_type } = userData;
 
-                const accessToken = generateAccessToken(userData);
-                const refreshToken = generateRefreshToken(user_slno);
+                console.log(userData)
 
-                // insert the refresh token
-                insertRefreshToken(
-                    { user_slno, refresh_token: refreshToken },
-                    (error, results) => {
+                const {
+                    user_slno,
+                    name,
+                    login_type,
+                    password_validity,
+                    last_passwd_change_date,
+                    iv,
+                    password_validity_expiry_date,
+                    last_login_date,
+                    sign_in_per_day_limit,
+                    sign_in_per_day_count,
+                    is_limited_user,
+                    login_method_allowed,
+                    limited_user_validity_end_time,
+                } = userData;
+
+
+                const validatingUserLogin = await validateUserLoginCheck(
+                    password_validity,
+                    last_passwd_change_date,
+                    last_login_date,
+                    sign_in_per_day_limit,
+                    sign_in_per_day_count,
+                    is_limited_user,
+                    login_method_allowed,
+                    limited_user_validity_end_time,
+                    body.method
+                )
+
+                const { message, status } = validatingUserLogin;
+                console.log(message, status)
+
+                if (status) {
+                    return res.status(200).json({
+                        success: 1,
+                        message,
+                    });
+                } else {
+
+                    const accessToken = generateAccessToken(userData);
+                    const refreshToken = generateRefreshToken(user_slno);
+
+                    // insert the refresh token
+                    insertRefreshToken({ user_slno, refresh_token: refreshToken }, (error, results) => {
                         if (error) {
                             logger.error(error);
                             return res.status(500).json({
@@ -292,8 +308,8 @@ module.exports = {
                                 message: "OTP verified successfully",
                             });
                         }
-                    }
-                );
+                    });
+                }
             }
         });
     },
@@ -377,5 +393,115 @@ module.exports = {
             res.clearCookie("accessToken");
             return res.status(200).json({ message: "Invalid refresh token" });
         })
-    }
+    },
+    userBasedLoginVerification: async (req, res) => {
+        const body = req.body;
+        // CHECK USER BASED VALIDATION FIRST CHECK THE PASSWORD CREDENTIAL THEN REST
+        userBasedValidationCheck(body, (error, results) => {
+
+            if (error) {
+                logger.error(error);
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error",
+                });
+            }
+
+            if (results.length === 0) {
+                return res.status(200).json({
+                    success: 1,
+                    message: "Incorrect User Credentials",
+                });
+            }
+
+            if (results.length > 0) {
+                const userData = results[0];
+                const userPassword = body.passWord
+                console.log(userData)
+                const validated = compareSync(userPassword, userData.password);
+
+                if (validated) {
+
+                    const {
+                        user_slno,
+                        name,
+                        login_type,
+                        password_validity,
+                        last_passwd_change_date,
+                        password_validity_expiry_date,
+                        last_login_date,
+                        sign_in_per_day_limit,
+                        sign_in_per_day_count,
+                        is_limited_user,
+                        login_method_allowed,
+                        limited_user_validity_end_time,
+                    } = userData;
+
+                    const validatingUserLogin = validateUserLoginCheck(
+                        password_validity,
+                        last_passwd_change_date,
+                        last_login_date,
+                        sign_in_per_day_limit,
+                        sign_in_per_day_count,
+                        is_limited_user,
+                        login_method_allowed,
+                        limited_user_validity_end_time,
+                        body.method
+                    )
+
+                    const { message, status } = validatingUserLogin;
+
+                    if (status) {
+                        return res.status(200).json({
+                            success: 1,
+                            message,
+                        });
+                    } else {
+
+                        const accessToken = generateAccessToken(userData);
+                        const refreshToken = generateRefreshToken(user_slno);
+
+                        // insert the refresh token
+                        insertRefreshToken({ user_slno, refresh_token: refreshToken }, (error, results) => {
+                            if (error) {
+                                logger.error(error);
+                                return res.status(500).json({
+                                    success: 0,
+                                    message: "Database connection error",
+                                });
+                            }
+
+                            if (results) {
+                                const returnData = {
+                                    user_slno,
+                                    name,
+                                    accessToken,
+                                    login_type,
+                                };
+
+                                res.cookie("accessToken", accessToken, {
+                                    httpOnly: true,
+                                    secure: true,
+                                    maxAge: process.env.COOKIE_TIME, // 15 min
+                                    sameSite: "strict",
+                                });
+
+                                res.json({
+                                    success: 2,
+                                    userInfo: JSON.stringify(returnData),
+                                    message: "User Credentials verified successfully",
+                                });
+                            }
+                        });
+                    }
+
+                } else {
+                    return res.status(200).json({
+                        success: 1,
+                        message: "Incorrect User Credentials",
+                    });
+                }
+            }
+        });
+    },
 };

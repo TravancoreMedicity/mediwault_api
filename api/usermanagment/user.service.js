@@ -162,7 +162,14 @@ module.exports = {
                 name,
                 login_type,
                 password_validity,
-                last_passwd_change_date
+                last_passwd_change_date,
+                iv,
+                password_validity_expiry_date,
+                last_login_date,
+                sign_in_per_day_limit,
+                sign_in_per_day_count,
+                is_limited_user,
+                login_method_allowed
             FROM  user 
             WHERE generatedotp = ?
             AND mobile  = ? 
@@ -245,5 +252,34 @@ module.exports = {
                 return callBack(null, results)
             }
         )
-    }
+    },
+    userBasedValidationCheck: (data, callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                user_slno,
+                name,
+                login_type,
+                password_validity,
+                last_passwd_change_date,
+                password,
+                password_validity_expiry_date,
+                last_login_date,
+                sign_in_per_day_limit,
+                sign_in_per_day_count,
+                is_limited_user,
+                login_method_allowed
+            FROM  user 
+            WHERE name = ?
+            AND user_status = 1`,
+            [
+                data.userName
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
 }
