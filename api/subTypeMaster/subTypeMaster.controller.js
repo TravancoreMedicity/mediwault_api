@@ -29,7 +29,6 @@ module.exports = {
             }
 
             if (results?.length === 0) {
-                console.log(body)
                 insertSubTypeMaster(body, (error, results) => {
                     if (error) {
                         logger.error(error)

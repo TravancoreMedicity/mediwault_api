@@ -96,8 +96,8 @@ app.use("/api/courseMaster", courseMaster);
 io.on("connection", (socket) => {
 
   socket.on("login", (user) => {
+    console.log(user)
     userId = user.user_slno
-    console.log('user slno', userId)
     if (activeUsers[userId]) {
       // Disconnect previous client if the user is already logged in
       const previousSocket = activeUsers[userId];
@@ -105,12 +105,16 @@ io.on("connection", (socket) => {
       previousSocket.disconnect();
     }
 
+    console.log(activeUsers)
     // Store the current user and socket
     activeUsers[userId] = socket;
 
     console.log(`User ${userId} logged in with socket ${socket.id}`);
   });
+
   socket.on("disconnect", () => {
+    console.log('disconnected ----')
+    console.log(activeUsers)
     // Remove the user from active users on disconnection
     for (const [userId, userSocket] of Object.entries(activeUsers)) {
       if (userSocket.id === socket.id) {

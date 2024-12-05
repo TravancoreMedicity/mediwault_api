@@ -37,7 +37,6 @@ module.exports = {
             ],
             (error, results, fields) => {
                 logger.error(error)
-                console.log(error)
                 if (error) {
                     return callBack(error)
                 }
@@ -273,6 +272,28 @@ module.exports = {
             AND user_status = 1`,
             [
                 data.userName
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    userBasedInsertRefreshToken: (data, callBack) => {
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        mysqlpool.query(
+            `UPDATE user 
+                SET token = ? ,
+                sessionid = ? ,
+                generatedotp = ?
+                WHERE user_slno = ? `,
+            [
+                data.refresh_token,
+                data.user_slno,
+                otp,
+                data.user_slno
             ],
             (error, results, fields) => {
                 if (error) {

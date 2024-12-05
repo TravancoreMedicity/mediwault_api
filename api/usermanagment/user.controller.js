@@ -19,7 +19,8 @@ const {
     getRefershToken,
     deleteRefreshToken,
     validateUserCredExcistOrNot,
-    userBasedValidationCheck
+    userBasedValidationCheck,
+    userBasedInsertRefreshToken
 } = require("./user.service");
 
 const { addHours, format } = require("date-fns");
@@ -233,8 +234,6 @@ module.exports = {
             if (results.length > 0) {
                 const userData = results[0];
 
-                console.log(userData)
-
                 const {
                     user_slno,
                     name,
@@ -265,7 +264,6 @@ module.exports = {
                 )
 
                 const { message, status } = validatingUserLogin;
-                console.log(message, status)
 
                 if (status) {
                     return res.status(200).json({
@@ -383,8 +381,6 @@ module.exports = {
     logOutFunctionality: (req, res) => {
         const id = req.params.id
         deleteRefreshToken(id, (error, results) => {
-            console.log(results)
-            console.log(error)
             if (error) {
                 logger.error(error);
                 res.clearCookie("accessToken");
@@ -417,7 +413,6 @@ module.exports = {
             if (results.length > 0) {
                 const userData = results[0];
                 const userPassword = body.passWord
-                console.log(userData)
                 const validated = compareSync(userPassword, userData.password);
 
                 if (validated) {
@@ -462,7 +457,7 @@ module.exports = {
                         const refreshToken = generateRefreshToken(user_slno);
 
                         // insert the refresh token
-                        insertRefreshToken({ user_slno, refresh_token: refreshToken }, (error, results) => {
+                        userBasedInsertRefreshToken({ user_slno, refresh_token: refreshToken }, (error, results) => {
                             if (error) {
                                 logger.error(error);
                                 return res.status(500).json({
