@@ -68,6 +68,7 @@ const institutionMaster = require("./api/InstitutionMaster/institutionMaster.rou
 const courseType = require("./api/courseType/courseType.route");
 const courseMaster = require("./api/courseMaster/courseMater.route");
 const docMaster = require("./api/docMaster/docMaster.route");
+const locationMaster = require("./api/locationaMaster/location.router");
 const { validateToken } = require("./api/tokenValidation/tokenValidation");
 
 app.get("/api/generateOTP/:id", generateOTP); // generate OTP function
@@ -84,6 +85,7 @@ app.use("/api/instituteType", institutionType);
 app.use("/api/institutionMaster", institutionMaster);
 app.use("/api/courseType", courseType);
 app.use("/api/courseMaster", courseMaster);
+app.use("/api/locationMaster", locationMaster);
 
 
 // io.on("connection", (socket) => {
