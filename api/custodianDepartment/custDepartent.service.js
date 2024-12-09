@@ -2,13 +2,12 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    insertLocationMaster: (data, callBack) => {
-        mysqlpool.query(
-            `INSERT INTO location_master (loc_name,loc_status)
-                VALUES (?,?)`,
+    insertCusDepartment: (data, callBack) => {
+        mysqlpool.execute(
+            `INSERT INTO custodian_department (cust_dept_name,cust_dept_status) VALUES (?,?)`,
             [
-                data.location_name,
-                data.location_status
+                data.custodian_department_name,
+                data.custodian_department_status
             ],
             (error, results, fields) => {
                 if (error) {
@@ -19,13 +18,14 @@ module.exports = {
             }
         )
     },
-    selectLocationMaster: (callBack) => {
+    selectCusDepartmentList: (callBack) => {
         mysqlpool.query(
             `SELECT 
-                loc_slno,
-                loc_name,
-                IF(loc_status = 0 , 'Inactive','Active') status
-            FROM location_master`,
+                cust_dept_slno,
+                cust_dept_name,
+                IF(cust_dept_status = 0 , 'Inactive','Active') status
+            FROM custodian_department 
+            WHERE cust_dept_status = 1`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -35,13 +35,13 @@ module.exports = {
             }
         )
     },
-    updateLocationMaster: (data, callBack) => {
-        mysqlpool.query(
-            `UPDATE location_master SET loc_name = ?, loc_status = ? WHERE loc_slno = ?`,
+    updateCusDepartment: (data, callBack) => {
+        mysqlpool.execute(
+            `UPDATE custodian_department SET cust_dept_name = ?, cust_dept_status = ? WHERE cust_dept_slno = ?`,
             [
-                data.locationName,
-                data.locationStatus,
-                data.locationSlno
+                data.custodian_department_name,
+                data.custodian_department_status,
+                data.custodian_department_slno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -52,9 +52,9 @@ module.exports = {
             }
         )
     },
-    deleteLocationMaster: (id, callBack) => {
-        mysqlpool.query(
-            `UPDATE location_master SET loc_status = 0 WHERE loc_slno = ?`,
+    deleteCusDepartment: (id, callBack) => {
+        mysqlpool.execute(
+            `UPDATE custodian_department SET cust_dept_status = 0 WHERE cust_dept_slno = ?`,
             [
                 id
             ],
@@ -67,9 +67,9 @@ module.exports = {
             }
         )
     },
-    getLocationMasterById: (id, callBack) => {
+    selectCusDepartmentById: (id, callBack) => {
         mysqlpool.query(
-            `SELECT * FROM location_master WHERE loc_slno = ?`,
+            `SELECT * FROM custodian_department WHERE cust_dept_slno = ?`,
             [
                 id
             ],
@@ -82,12 +82,24 @@ module.exports = {
             }
         )
     },
-    getSelectLocationMasterLIst: (callBack) => {
+    selectCusDepartment: (callBack) => {
         mysqlpool.query(
-            `SELECT 
-                loc_slno,
-                loc_name
-            FROM location_master WHERE loc_status = 1`,
+            `SELECT cust_dept_slno,cust_dept_name FROM custodian_department WHERE cust_dept_status = 1`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    checkCusDepartmentNameDuplicate: (name, callBack) => {
+        mysqlpool.query(
+            `SELECT cust_dept_slno FROM custodian_department WHERE cust_dept_name = ? AND cust_dept_status = 1`,
+            [
+                name
+            ],
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -97,5 +109,4 @@ module.exports = {
             }
         )
     }
-
 }

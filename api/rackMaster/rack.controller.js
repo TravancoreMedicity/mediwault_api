@@ -1,18 +1,17 @@
 const logger = require('../../logger/logger');
 const {
-    insertLocationMaster,
-    selectLocationMaster,
-    updateLocationMaster,
-    deleteLocationMaster,
-    getLocationMasterById,
-    getSelectLocationMasterLIst
-} = require('./location.service');
+    insertRackMaster,
+    updateRackMaster,
+    deleteRackMaster,
+    selectRackMaster,
+    selectRackMasterById,
+    selectCmpRackMaster
+} = require('./rack.service');
 
 module.exports = {
-
-    insertLocationMaster: (req, res) => {
+    insertRackMaster: (req, res) => {
         const body = req.body
-        insertLocationMaster(body, (error, results) => {
+        insertRackMaster(body, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -30,29 +29,9 @@ module.exports = {
             }
         })
     },
-
-    selectLocationMaster: (req, res) => {
-        selectLocationMaster((error, results) => {
-            if (error) {
-                logger.error(error)
-                return res.status(500).json({
-                    success: 0,
-                    message: "Database connection error"
-                });
-            }
-
-            if (results) {
-                return res.status(200).json({
-                    success: 1,
-                    data: results
-                });
-            }
-        })
-    },
-
-    updateLocationMaster: (req, res) => {
+    updateRackMaster: (req, res) => {
         const body = req.body
-        updateLocationMaster(body, (error, results) => {
+        updateRackMaster(body, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -70,10 +49,9 @@ module.exports = {
             }
         })
     },
-
-    deleteLocationMaster: (req, res) => {
+    deleteRackMaster: (req, res) => {
         const id = req.params.id
-        deleteLocationMaster(id, (error, results) => {
+        deleteRackMaster(id, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -91,10 +69,27 @@ module.exports = {
             }
         })
     },
+    selectRackMaster: (req, res) => {
+        selectRackMaster((error, results) => {
+            if (error) {
+                logger.error(error)
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
 
-    getLocationMasterById: (req, res) => {
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    selectRackMasterById: (req, res) => {
         const id = req.params.id
-        getLocationMasterById(id, (error, results) => {
+        selectRackMasterById(id, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -111,8 +106,8 @@ module.exports = {
             }
         })
     },
-    getSelectLocationMasterLIst: (req, res) => {
-        getSelectLocationMasterLIst((error, results) => {
+    selectCmpRackMaster: (req, res) => {
+        selectCmpRackMaster((error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -128,5 +123,5 @@ module.exports = {
                 });
             }
         })
-    },
+    }
 }

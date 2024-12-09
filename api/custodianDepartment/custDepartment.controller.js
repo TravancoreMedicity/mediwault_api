@@ -1,18 +1,58 @@
 const logger = require('../../logger/logger');
 const {
-    insertLocationMaster,
-    selectLocationMaster,
-    updateLocationMaster,
-    deleteLocationMaster,
-    getLocationMasterById,
-    getSelectLocationMasterLIst
-} = require('./location.service');
+    insertCusDepartment,
+    selectCusDepartmentList,
+    updateCusDepartment,
+    deleteCusDepartment,
+    selectCusDepartmentById,
+    selectCusDepartment,
+    checkCusDepartmentNameDuplicate
+} = require('./custDepartent.service');
 
 module.exports = {
+    insertCusDepartment: (req, res) => {
+        const body = req.body;
+        const name = body?.custodian_department_name?.trim()
 
-    insertLocationMaster: (req, res) => {
-        const body = req.body
-        insertLocationMaster(body, (error, results) => {
+        checkCusDepartmentNameDuplicate(name, (error, results) => {
+            if (error) {
+                logger.error(error)
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results?.length > 0) {
+                return res.status(200).json({
+                    success: 2,
+                    message: 'Custodian Department name already exist'
+                });
+            }
+
+            if (results?.length === 0) {
+                insertCusDepartment(body, (error, results) => {
+                    if (error) {
+                        logger.error(error)
+                        return res.status(500).json({
+                            success: 0,
+                            message: "Database connection error"
+                        });
+                    }
+
+                    if (results) {
+                        return res.status(200).json({
+                            success: 1,
+                            message: 'successfully Inserted',
+                            data: results
+                        });
+                    }
+                })
+            }
+        })
+    },
+    selectCusDepartmentList: (req, res) => {
+        selectCusDepartmentList((error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -24,35 +64,14 @@ module.exports = {
             if (results) {
                 return res.status(200).json({
                     success: 1,
-                    message: 'successfully Inserted',
                     data: results
                 });
             }
         })
     },
-
-    selectLocationMaster: (req, res) => {
-        selectLocationMaster((error, results) => {
-            if (error) {
-                logger.error(error)
-                return res.status(500).json({
-                    success: 0,
-                    message: "Database connection error"
-                });
-            }
-
-            if (results) {
-                return res.status(200).json({
-                    success: 1,
-                    data: results
-                });
-            }
-        })
-    },
-
-    updateLocationMaster: (req, res) => {
+    updateCusDepartment: (req, res) => {
         const body = req.body
-        updateLocationMaster(body, (error, results) => {
+        updateCusDepartment(body, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -70,10 +89,9 @@ module.exports = {
             }
         })
     },
-
-    deleteLocationMaster: (req, res) => {
+    deleteCusDepartment: (req, res) => {
         const id = req.params.id
-        deleteLocationMaster(id, (error, results) => {
+        deleteCusDepartment(id, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -91,10 +109,9 @@ module.exports = {
             }
         })
     },
-
-    getLocationMasterById: (req, res) => {
+    selectCusDepartmentById: (req, res) => {
         const id = req.params.id
-        getLocationMasterById(id, (error, results) => {
+        selectCusDepartmentById(id, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -111,8 +128,8 @@ module.exports = {
             }
         })
     },
-    getSelectLocationMasterLIst: (req, res) => {
-        getSelectLocationMasterLIst((error, results) => {
+    selectCusDepartment: (req, res) => {
+        selectCusDepartment((error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -128,5 +145,5 @@ module.exports = {
                 });
             }
         })
-    },
+    }
 }

@@ -70,6 +70,9 @@ const courseMaster = require("./api/courseMaster/courseMater.route");
 const docMaster = require("./api/docMaster/docMaster.route");
 const locationMaster = require("./api/locationaMaster/location.router");
 const { validateToken } = require("./api/tokenValidation/tokenValidation");
+const rackMaster = require("./api/rackMaster/rack.route");
+const custodianDepartment = require("./api/custodianDepartment/custDeparment.route");
+const custodianMaster = require("./api/CustodianMaster/custodian.route");
 
 app.get("/api/generateOTP/:id", generateOTP); // generate OTP function
 app.get("/api/validateToken", validateToken);
@@ -86,6 +89,9 @@ app.use("/api/institutionMaster", institutionMaster);
 app.use("/api/courseType", courseType);
 app.use("/api/courseMaster", courseMaster);
 app.use("/api/locationMaster", locationMaster);
+app.use("/api/rackMaster", rackMaster);
+app.use("/api/custodianDepartment", custodianDepartment);
+app.use("/api/custodianMaster", custodianMaster);
 
 
 // io.on("connection", (socket) => {
