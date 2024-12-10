@@ -94,7 +94,7 @@ module.exports = {
         mysqlpool.query(
             `SELECT 
                 R.rac_slno,
-                CONCAT(R.rac_alice ,' - ', UPPER(L.loc_name)) AS RACK
+                CONCAT(R.rac_alice ,' - ', UPPER(L.loc_name)) AS rack
             FROM rack_master R
             LEFT JOIN location_master L ON L.loc_slno = R.loc_slno
             WHERE R.rac_status = 1`,

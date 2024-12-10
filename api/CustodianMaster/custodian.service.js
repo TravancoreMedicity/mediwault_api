@@ -21,7 +21,10 @@ module.exports = {
     },
     selectCustodianMaster: (callBack) => {
         mysqlpool.query(
-            `SELECT cust_slno,cust_name FROM custodian_master WHERE cust_status = 1`,
+            `SELECT 
+                cust_slno,
+                cust_name 
+            FROM custodian_master WHERE cust_status = 1`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
