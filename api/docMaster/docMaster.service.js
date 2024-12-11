@@ -22,9 +22,11 @@ module.exports = {
                 doc_exp_end,
                 isRequiredExp,
                 isSecure,
-                docStatus
+                docStatus,
+                docRack,
+                docCustodian
             ) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         data.docID,
         data.docNumber,
@@ -44,6 +46,8 @@ module.exports = {
         data.isRequiredExp,
         data.isSecure,
         1,
+        data.docRack,
+        data.docCustodian
       ],
       (error, results, fields) => {
         if (error) {
