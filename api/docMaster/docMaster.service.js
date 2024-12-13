@@ -24,9 +24,12 @@ module.exports = {
                 isSecure,
                 docStatus,
                 docRack,
-                docCustodian
+                docCustodian,
+                docVer,
+                uploadUser,
+                uploadDate
             ) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         data.docID,
         data.docNumber,
@@ -47,7 +50,10 @@ module.exports = {
         data.isSecure,
         1,
         data.docRack,
-        data.docCustodian
+        data.docCustodian,
+        data.docVersion,
+        data.userID,
+        data.docUpload
       ],
       (error, results, fields) => {
         if (error) {
@@ -65,6 +71,7 @@ module.exports = {
                 D.doc_slno,
                 D.doc_id,
                 D.doc_number,
+                D.docVer,
                 D.doc_name,
                 D.doc_desc,
                 T.doc_type_master_name,
@@ -307,13 +314,28 @@ module.exports = {
       (item) =>
         new Promise((resolve, reject) => {
           mysqlpool.query(
-            `INSERT INTO document_detl (doc_id,doc_number,originalname,mimetype,filename) VALUES (?,?,?,?,?)`,
+            `INSERT INTO document_detl (
+                doc_id,
+                doc_number,
+                originalname,
+                mimetype,
+                filename,
+                docVer,
+                docVerDate,
+                docCreatedDate,
+                docCreateUser
+              ) 
+              VALUES (?,?,?,?,?,?,?,?,?)`,
             [
               item.docID,
               item.docNumber,
               item.originalname,
               item.mimetype,
               item.filename,
+              item.docVersion,
+              item.docCreatedDate,
+              item.docCreatedDate,
+              item.docCreatedBy
             ],
             (error, results, fields) => {
               if (error) {

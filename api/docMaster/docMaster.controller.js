@@ -60,6 +60,9 @@ module.exports = {
           ...el,
           docID: body.docID,
           docNumber: body.docNumber,
+          docVersion: body.docVersion,
+          docCreatedDate: body.docUpload,
+          docCreatedBy: body.userID
         };
       });
 
