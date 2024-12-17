@@ -179,26 +179,54 @@ module.exports = {
   getDocMasterById: (id, callBack) => {
     mysqlpool.query(
       `SELECT 
-                doc_slno,
-                doc_id,
-                doc_number,
-                doc_name,
-                doc_desc,
-                doc_type,
-                doc_sub_type,
-                institute,
-                course,
-                category,
-                sub_category,
-                group_mast,
-                doc_date,
-                doc_ver_date,
-                doc_exp_start,
-                doc_exp_end,
-                isRequiredExp,
-                isSecure
-            FROM document_master 
-            WHERE docStatus = 1 AND doc_slno = ?`,
+            D.doc_slno,
+            D.doc_id,
+            D.doc_number,
+            D.doc_name,
+            D.doc_desc,
+            D.doc_type, -- DOC TYPE
+            T.main_type_name,
+            D.doc_sub_type, -- DOC-SUB-TYPE
+            S.doc_sub_type_name,
+            D.institute, -- INSTITUTE
+            I.institution_name,
+            D.course, -- COURSE
+            C.course_name,
+            D.category, -- CATEGORY
+            G.category_name,
+            D.sub_category, -- SUB CATEGORY
+            SC.subcat_name,
+            D.group_mast, -- GROUP MASTER 
+            DG.group_name,
+            D.docVer,
+            D.doc_date, 
+            D.doc_ver_date,
+            D.doc_exp_start,
+            D.doc_exp_end,
+            D.isRequiredExp,
+            D.isSecure,
+            D.docRack, -- RACK NAME
+            R.rac_desc,
+            LM.loc_name,
+            CONCAT(R.rac_alice ,' - ', UPPER(LM.loc_name)) AS rack, -- RACK AND LOCATION NAME
+            D.docCustodian, 
+            CN.cust_name,-- CUSTODIAN NAME
+            D.uploadUser,
+            U.name,
+            D.uploadDate
+        FROM document_master D
+      LEFT JOIN doc_main_type T ON T.main_type_slno = D.doc_type
+            LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+            LEFT JOIN institution_master I ON I.institution_slno = D.institute
+            LEFT JOIN course_master C ON C.course_slno = D.course
+            LEFT JOIN doc_category_master G ON G.cat_slno = D.category
+            LEFT JOIN doc_subcat_master SC ON SC.subcat_slno = D.sub_category
+            LEFT JOIN doc_group_master DG ON DG.group_slno = D.group_mast
+            LEFT JOIN rack_master R ON R.rac_slno = D.docRack
+            LEFT JOIN location_master LM ON LM.loc_slno = R.loc_slno
+            LEFT JOIN custodian_master CN ON CN.cust_slno = D.docCustodian
+            LEFT JOIN user U ON U.user_slno = D.uploadUser
+        WHERE docStatus = 1 AND doc_slno = ?`,
       [id],
       (error, results, fields) => {
         if (error) {
