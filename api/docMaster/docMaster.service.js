@@ -378,13 +378,19 @@ module.exports = {
   getDocDetlinfo: (id, callBack) => {
     mysqlpool.query(
       `SELECT 
-                doc_id,
-                doc_number,
-                originalname,
-                mimetype,
-                filename
-            FROM document_detl
-            WHERE doc_id = ?`,
+          D.doc_id,
+          D.doc_number,
+          D.originalname,
+          D.mimetype,
+          D.filename,
+          D.docVer,
+          D.docVerDate,
+          D.docCreateUser,
+          U.name,
+          D.docCreatedDate
+      FROM document_detl D
+      LEFT JOIN user U ON U.user_slno = D.docCreateUser
+      WHERE doc_id = ?`,
       [id],
       (error, results, fields) => {
         if (error) {
