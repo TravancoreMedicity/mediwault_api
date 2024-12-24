@@ -26,10 +26,12 @@ module.exports = {
                 docRack,
                 docCustodian,
                 docVer,
+                docVer_amentment,
+                dovVer_infoAment,
                 uploadUser,
                 uploadDate
             ) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         data.docID,
         data.docNumber,
@@ -52,6 +54,8 @@ module.exports = {
         data.docRack,
         data.docCustodian,
         data.docVersion,
+        data.docVersionAment,
+        data.docVersionInfoEdit,
         data.userID,
         data.docUpload
       ],
@@ -68,30 +72,30 @@ module.exports = {
   getDocMaster: (callBack) => {
     mysqlpool.query(
       `SELECT 
-                D.doc_slno,
-                D.doc_id,
-                D.doc_number,
-                D.docVer,
-                D.doc_name,
-                D.doc_desc,
-                T.doc_type_master_name,
-                S.doc_sub_type_name,
-                I.institution_name,
-                C.course_name,
-                A.category_name,
-                M.subcat_name,
-                G.group_name,
-                D.doc_date,
-                D.doc_ver_date
-            FROM document_master D
-            LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
-            LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
-            LEFT JOIN institution_master I ON I.institution_slno = D.institute
-            LEFT JOIN course_master C ON C.course_slno = D.course
-            LEFT JOIN doc_category_master A ON A.cat_slno = D.category
-            LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
-            LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
-            WHERE D.docStatus = 1`,
+          D.doc_slno,
+          D.doc_id,
+          D.doc_number,
+          CONCAT(D.docVer ,'.', D.docVer_amentment,'.',D.dovVer_infoAment) AS docVer,
+          D.doc_name,
+          D.doc_desc,
+          T.doc_type_master_name,
+          S.doc_sub_type_name,
+          I.institution_name,
+          C.course_name,
+          A.category_name,
+          M.subcat_name,
+          G.group_name,
+          D.doc_date,
+          D.doc_ver_date
+      FROM document_master D
+      LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
+      LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+      LEFT JOIN institution_master I ON I.institution_slno = D.institute
+      LEFT JOIN course_master C ON C.course_slno = D.course
+      LEFT JOIN doc_category_master A ON A.cat_slno = D.category
+      LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
+      LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+      WHERE D.docStatus = 1`,
       [],
       (error, results, fields) => {
         if (error) {
