@@ -203,6 +203,8 @@ module.exports = {
             D.group_mast, -- GROUP MASTER 
             DG.group_name,
             D.docVer,
+            D.docVer_amentment,
+            D.dovVer_infoAment,
             D.doc_date, 
             D.doc_ver_date,
             D.doc_exp_start,
@@ -353,11 +355,13 @@ module.exports = {
                 mimetype,
                 filename,
                 docVer,
+                docVer_amentment,
+                dovVer_infoAment,
                 docVerDate,
                 docCreatedDate,
                 docCreateUser
               ) 
-              VALUES (?,?,?,?,?,?,?,?,?)`,
+              VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
             [
               item.docID,
               item.docNumber,
@@ -365,6 +369,8 @@ module.exports = {
               item.mimetype,
               item.filename,
               item.docVersion,
+              item.docVersionAment,
+              item.docVersionInfoEdit,
               item.docCreatedDate,
               item.docCreatedDate,
               item.docCreatedBy
@@ -388,6 +394,8 @@ module.exports = {
           D.mimetype,
           D.filename,
           D.docVer,
+          D.docVer_amentment,
+          D.dovVer_infoAment,
           D.docVerDate,
           D.docCreateUser,
           U.name,
@@ -437,4 +445,63 @@ module.exports = {
       }
     );
   },
+  updateDocMaster: (data, callBack) => {
+    mysqlpool.query(
+      `UPDATE document_master 
+        SET 
+          doc_name = ?,
+          doc_desc = ?,
+          doc_type = ?,
+          doc_sub_type = ?,
+          institute = ?,
+          course = ?,
+          category = ?,
+          sub_category = ?,
+          group_mast = ?,
+          docRack = ?,
+          docCustodian = ?,
+          docVer = ?,
+          docVer_amentment = ?,
+          dovVer_infoAment = ?,
+          doc_ver_date = ?,
+          doc_exp_start = ?,
+          doc_exp_end = ?,
+          isRequiredExp = ?,
+          isSecure = ?,
+          editUser = ?,
+          editDate = ?
+        WHERE doc_id = ? `,
+      [
+        data.docName,
+        data.docDes,
+        data.docType,
+        data.docSubType,
+        data.institute,
+        data.course,
+        data.category,
+        data.subCategory,
+        data.group,
+        data.docRack,
+        data.docCustodian,
+        data.docVersion,
+        data.docVersionAment,
+        data.docVersionInfoEdit,
+        data.docVersionDate,
+        data.docExpStart,
+        data.docExpEnd,
+        data.isRequiredExp,
+        data.isSecure,
+        data.userID,
+        data.docEditDate,
+        data.docID,
+      ],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  }
 };

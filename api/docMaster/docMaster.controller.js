@@ -13,7 +13,8 @@ const {
   getDocDetlinfo,
   getDocTypeCount,
   getDocMasterLikeNameNonSecureOnly,
-  getSearchData
+  getSearchData,
+  updateDocMaster
 } = require("./docMaster.service");
 
 const { uploadFile } = require("../multer.config/FileuploadConfig");
@@ -61,6 +62,8 @@ module.exports = {
           docID: body.docID,
           docNumber: body.docNumber,
           docVersion: body.docVersion,
+          docVersionAment: body.docVersionAment,
+          docVersionInfoEdit: body.docVersionInfoEdit,
           docCreatedDate: body.docUpload,
           docCreatedBy: body.userID
         };
@@ -92,14 +95,13 @@ module.exports = {
             }
             if (results) {
               // INSERT DOCUEMTN DETAILS FILE UPLOAD
-              Promise.all(insertDocDetl(postUploadFileData))
-                .then(() => {
-                  inCrementDocSerialNumber((err, results) => logger.error(err)); //increment file upload doc number
-                  return res.status(200).json({
-                    success: 1,
-                    message: "Record Inserted successfully",
-                  });
-                })
+              Promise.all(insertDocDetl(postUploadFileData)).then(() => {
+                inCrementDocSerialNumber((err, results) => logger.error(err)); //increment file upload doc number
+                return res.status(200).json({
+                  success: 1,
+                  message: "Record Inserted successfully",
+                });
+              })
                 .catch((err) => {
                   logger.error(err);
                   return res.status(200).json({
@@ -323,5 +325,22 @@ module.exports = {
       });
     }
 
+  },
+  updateDocMaster: (req, res) => {
+    const body = req.body
+    updateDocMaster(body, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
   },
 };
