@@ -2,14 +2,12 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    // TABLE NAME - doc_type_master 
-    insertDocTypeMaster: (data, callBack) => {
-        mysqlpool.query(
-            `INSERT INTO doc_type_master (doc_type_master_name,main_type_slno,doc_type_master_status) VALUES (?,?,?)`,
+    insertCusDepartment: (data, callBack) => {
+        mysqlpool.execute(
+            `INSERT INTO custodian_department (cust_dept_name,cust_dept_status) VALUES (?,?)`,
             [
-                data.docTypeMasterName,
-                data.docMainType,
-                data.docTypeMasterStatus,
+                data.custodian_department_name,
+                data.custodian_department_status
             ],
             (error, results, fields) => {
                 if (error) {
@@ -20,19 +18,30 @@ module.exports = {
             }
         )
     },
-    editDocTypeMaster: (data, callBack) => {
+    selectCusDepartmentList: (callBack) => {
         mysqlpool.query(
-            `UPDATE doc_type_master 
-                SET 
-                        doc_type_master_name = ?, 
-                        main_type_slno = ?, 
-                        doc_type_master_status = ? 
-                WHERE doc_type_slno = ?`,
+            `SELECT 
+                cust_dept_slno,
+                cust_dept_name,
+                IF(cust_dept_status = 0 , 'Inactive','Active') status
+            FROM custodian_department 
+            WHERE cust_dept_status = 1`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    updateCusDepartment: (data, callBack) => {
+        mysqlpool.execute(
+            `UPDATE custodian_department SET cust_dept_name = ?, cust_dept_status = ? WHERE cust_dept_slno = ?`,
             [
-                data.docTypeMasterName,
-                data.docMainType,
-                data.docTypeMasterStatus,
-                data.docTypeSlno
+                data.custodian_department_name,
+                data.custodian_department_status,
+                data.custodian_department_slno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -43,12 +52,9 @@ module.exports = {
             }
         )
     },
-    inactiveDocTypeMater: (id, callBack) => {
-        mysqlpool.query(
-            `UPDATE doc_type_master 
-                SET 
-                        doc_type_master_status = 2
-                WHERE doc_type_slno = ?`,
+    deleteCusDepartment: (id, callBack) => {
+        mysqlpool.execute(
+            `UPDATE custodian_department SET cust_dept_status = 0 WHERE cust_dept_slno = ?`,
             [
                 id
             ],
@@ -61,15 +67,12 @@ module.exports = {
             }
         )
     },
-    getDocTypeMaster: (callBack) => {
+    selectCusDepartmentById: (id, callBack) => {
         mysqlpool.query(
-            `SELECT 
-                D.doc_type_slno,
-                D.doc_type_master_name,
-                M.main_type_name,
-                IF(D.doc_type_master_status = 1,'Active','Inactive' ) status
-            FROM doc_type_master D
-            LEFT JOIN doc_main_type M ON D.main_type_slno = M.main_type_slno`,
+            `SELECT * FROM custodian_department WHERE cust_dept_slno = ?`,
+            [
+                id
+            ],
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -79,10 +82,9 @@ module.exports = {
             }
         )
     },
-    getDocTypeMasterById: (id, callBack) => {
+    selectCusDepartment: (callBack) => {
         mysqlpool.query(
-            `SELECT * FROM doc_type_master WHERE doc_type_slno = ?`,
-            [id],
+            `SELECT cust_dept_slno,cust_dept_name FROM custodian_department WHERE cust_dept_status = 1`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -92,27 +94,12 @@ module.exports = {
             }
         )
     },
-    docTypeMasterNameChecking: (data, callBack) => {
+    checkCusDepartmentNameDuplicate: (name, callBack) => {
         mysqlpool.query(
-            `SELECT doc_type_slno FROM doc_type_master WHERE doc_type_master_name = ?`,
-            [data.docTypeMasterName],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error)
-                    return callBack(error)
-                }
-                return callBack(null, results)
-            }
-        )
-
-    },
-    selectDocTypeMaster: (callBack) => {
-        mysqlpool.query(
-            `SELECT 
-                doc_type_slno,
-                doc_type_master_name
-            FROM doc_type_master
-            WHERE doc_type_master_status = 1`,
+            `SELECT cust_dept_slno FROM custodian_department WHERE cust_dept_name = ? AND cust_dept_status = 1`,
+            [
+                name
+            ],
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -122,5 +109,4 @@ module.exports = {
             }
         )
     }
-
 }

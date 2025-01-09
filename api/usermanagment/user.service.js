@@ -4,8 +4,22 @@ const logger = require('../../logger/logger')
 module.exports = {
     insertUser: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO user (name,mobile,email,login_type,password,password_validity,user_status) 
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO user(
+                name,
+                mobile,
+                email,
+                login_type,
+                password,
+                password_validity,
+                password_validity_expiry_date,
+                user_status,
+                sign_in_per_day_limit,
+                is_limited_user,
+                login_method_allowed,
+                created_user,
+                last_passwd_change_date
+                )
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
                 data.name,
                 data.mobile,
@@ -13,7 +27,13 @@ module.exports = {
                 data.login_Type,
                 data.password,
                 data.password_Validity,
-                data.user_Status
+                data.password_validity_expiry_date,
+                data.user_Status,
+                data.signIn_Limit,
+                data.setOndayLogin,
+                data.loginMethod,
+                data.created_by,
+                data.lastPasswordChangeDate
             ],
             (error, results, fields) => {
                 logger.error(error)
@@ -141,7 +161,14 @@ module.exports = {
                 name,
                 login_type,
                 password_validity,
-                last_passwd_change_date
+                last_passwd_change_date,
+                iv,
+                password_validity_expiry_date,
+                last_login_date,
+                sign_in_per_day_limit,
+                sign_in_per_day_count,
+                is_limited_user,
+                login_method_allowed
             FROM  user 
             WHERE generatedotp = ?
             AND mobile  = ? 
@@ -157,5 +184,123 @@ module.exports = {
                 }
                 return callBack(null, results)
             })
-    }
+    },
+    insertRefreshToken: (data, callBack) => {
+        mysqlpool.query(
+            `UPDATE user 
+                SET token = ? ,
+                sessionid = ? 
+                WHERE user_slno = ? `,
+            [
+                data.refresh_token,
+                data.user_slno,
+                data.user_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    getRefershToken: async (id, callBack) => {
+        mysqlpool.query(
+            `SELECT token,sessionid FROM user WHERE user_slno = ?`,
+            [
+                id
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    deleteRefreshToken: (id, callBack) => {
+        mysqlpool.query(
+            `UPDATE user SET token = null, sessionid = null WHERE user_slno = ?`,
+            [
+                id
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    validateUserCredExcistOrNot: (data, callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                user_slno
+            FROM user 
+            WHERE mobile = ? || email = ? || name = ?`,
+            [
+                data.mobile,
+                data.email,
+                data.name
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    userBasedValidationCheck: (data, callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                user_slno,
+                name,
+                login_type,
+                password_validity,
+                last_passwd_change_date,
+                password,
+                password_validity_expiry_date,
+                last_login_date,
+                sign_in_per_day_limit,
+                sign_in_per_day_count,
+                is_limited_user,
+                login_method_allowed
+            FROM  user 
+            WHERE name = ?
+            AND user_status = 1`,
+            [
+                data.userName
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    userBasedInsertRefreshToken: (data, callBack) => {
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        mysqlpool.query(
+            `UPDATE user 
+                SET token = ? ,
+                sessionid = ? ,
+                generatedotp = ?
+                WHERE user_slno = ? `,
+            [
+                data.refresh_token,
+                data.user_slno,
+                otp,
+                data.user_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
 }

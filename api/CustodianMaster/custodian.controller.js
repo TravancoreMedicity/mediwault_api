@@ -1,57 +1,61 @@
-require('dotenv').config();
 const logger = require('../../logger/logger');
+
 const {
-    insertDocTypeMaster,
-    getDocTypeMaster,
-    getDocTypeMasterById,
-    editDocTypeMaster,
-    inactiveDocTypeMater,
-    docTypeMasterNameChecking,
-    selectDocTypeMaster
-} = require('./docTypeMaster.service');
+    insertCustodianMaster,
+    selectCustodianMaster,
+    selectCustodianMasterById,
+    updateCustodianMaster,
+    deleteCustodianMaster,
+    selectCustodianMasterList,
+    checkCustodianDepartment
+} = require('./custodian.service');
 
 module.exports = {
-    insertDocTypeMaster: (req, res) => {
+    insertCustodianMaster: (req, res) => {
         const body = req.body
-        // Checking function for name already excist or not
-        const docTypeMasterName = body?.docTypeMasterName?.trim()
 
-        docTypeMasterNameChecking({ docTypeMasterName }, (err, results) => {
-            if (err) {
-                logger.error(err)
+        const deptID = body.custodian_department_name
+        checkCustodianDepartment(deptID, (error, results) => {
+            if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
                 });
             }
-            if (results?.length > 0) {
+
+            if (results && results.length > 0) {
                 return res.status(200).json({
                     success: 2,
-                    message: "Document type name already exist"
+                    message: 'Department name already exist'
                 });
             }
-            if (results?.length === 0) {
-                insertDocTypeMaster(body, (err, results) => {
-                    if (err) {
-                        logger.error(err)
+
+            if (results && results.length === 0) {
+                insertCustodianMaster(body, (error, results) => {
+                    if (error) {
+                        logger.error(error)
                         return res.status(500).json({
                             success: 0,
                             message: "Database connection error"
                         });
                     }
-                    return res.status(200).json({
-                        success: 1,
-                        message: 'success',
-                        data: results
-                    });
-                });
+
+                    if (results) {
+                        return res.status(200).json({
+                            success: 1,
+                            message: 'successfully Inserted',
+                            data: results
+                        });
+                    }
+                })
             }
         })
     },
-    editDocTypeMaster: (req, res) => {
-        editDocTypeMaster(req.body, (err, results) => {
-            if (err) {
-                logger.error(err)
+    selectCustodianMaster: (req, res) => {
+        selectCustodianMaster((error, results) => {
+            if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -59,16 +63,15 @@ module.exports = {
             }
             return res.status(200).json({
                 success: 1,
-                message: 'success',
                 data: results
             });
-        });
+        })
     },
-    inactiveDocTypeMater: (req, res) => {
+    selectCustodianMasterById: (req, res) => {
         const id = req.params.id
-        inactiveDocTypeMater(id, (err, results) => {
-            if (err) {
-                logger.error(err)
+        selectCustodianMasterById(id, (error, results) => {
+            if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -76,15 +79,15 @@ module.exports = {
             }
             return res.status(200).json({
                 success: 1,
-                message: 'success',
                 data: results
             });
-        });
+        })
     },
-    getDocTypeMaster: (req, res) => {
-        getDocTypeMaster((err, results) => {
-            if (err) {
-                logger.error(err)
+    updateCustodianMaster: (req, res) => {
+        const body = req.body
+        updateCustodianMaster(body, (error, results) => {
+            if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -92,16 +95,16 @@ module.exports = {
             }
             return res.status(200).json({
                 success: 1,
-                message: 'success',
+                message: 'successfully Updated',
                 data: results
             });
-        });
+        })
     },
-    getDocTypeMasterById: (req, res) => {
+    deleteCustodianMaster: (req, res) => {
         const id = req.params.id
-        getDocTypeMasterById(id, (err, results) => {
-            if (err) {
-                logger.error(err)
+        deleteCustodianMaster(id, (error, results) => {
+            if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -109,15 +112,15 @@ module.exports = {
             }
             return res.status(200).json({
                 success: 1,
-                message: 'success',
+                message: 'successfully Deleted',
                 data: results
             });
-        });
+        })
     },
-    selectDocTypeMaster: (req, res) => {
-        selectDocTypeMaster((err, results) => {
-            if (err) {
-                logger.error(err)
+    selectCustodianMasterList: (req, res) => {
+        selectCustodianMasterList((error, results) => {
+            if (error) {
+                logger.error(error)
                 return res.status(500).json({
                     success: 0,
                     message: "Database connection error"
@@ -125,10 +128,8 @@ module.exports = {
             }
             return res.status(200).json({
                 success: 1,
-                message: 'success',
                 data: results
             });
-        });
-    }
-
+        })
+    },
 }

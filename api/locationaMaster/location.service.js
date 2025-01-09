@@ -2,13 +2,13 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    insertSubTypeMaster: (data, callBack) => {
+    insertLocationMaster: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_sub_type_master (doc_sub_type_name,doc_sub_type_status) 
+            `INSERT INTO location_master (loc_name,loc_status)
                 VALUES (?,?)`,
             [
-                data.sub_type_name,
-                data.sub_type_status
+                data.location_name,
+                data.location_status
             ],
             (error, results, fields) => {
                 if (error) {
@@ -19,10 +19,13 @@ module.exports = {
             }
         )
     },
-    checkSubMasterNameDuplicate: (data, callBack) => {
+    selectLocationMaster: (callBack) => {
         mysqlpool.query(
-            `SELECT sub_type_slno FROM doc_sub_type_master WHERE doc_sub_type_name = ?`,
-            [data],
+            `SELECT 
+                loc_slno,
+                loc_name,
+                IF(loc_status = 0 , 'Inactive','Active') status
+            FROM location_master`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -32,16 +35,13 @@ module.exports = {
             }
         )
     },
-    editSubTypeMaster: (data, callBack) => {
+    updateLocationMaster: (data, callBack) => {
         mysqlpool.query(
-            `UPDATE doc_sub_type_master 
-                SET doc_sub_type_name = ?,
-                    doc_sub_type_status = ? 
-                WHERE sub_type_slno = ?`,
+            `UPDATE location_master SET loc_name = ?, loc_status = ? WHERE loc_slno = ?`,
             [
-                data.sub_type_name,
-                data.sub_type_status,
-                data.sub_type_slno
+                data.locationName,
+                data.locationStatus,
+                data.locationSlno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -52,13 +52,12 @@ module.exports = {
             }
         )
     },
-    getAllSubTypeMaster: (callBack) => {
+    deleteLocationMaster: (id, callBack) => {
         mysqlpool.query(
-            `SELECT 
-                sub_type_slno,
-                doc_sub_type_name,
-                IF(doc_sub_type_status = 0 , 'Inactive','Active') status
-            FROM doc_sub_type_master`,
+            `UPDATE location_master SET loc_status = 0 WHERE loc_slno = ?`,
+            [
+                id
+            ],
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -68,10 +67,12 @@ module.exports = {
             }
         )
     },
-    getSubTypeMasterById: (id, callBack) => {
+    getLocationMasterById: (id, callBack) => {
         mysqlpool.query(
-            `SELECT * FROM doc_sub_type_master WHERE sub_type_slno = ?`,
-            [id],
+            `SELECT * FROM location_master WHERE loc_slno = ?`,
+            [
+                id
+            ],
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -81,13 +82,12 @@ module.exports = {
             }
         )
     },
-    selectSubTypeMaster: (callBack) => {
+    getSelectLocationMasterLIst: (callBack) => {
         mysqlpool.query(
             `SELECT 
-                sub_type_slno,
-                doc_sub_type_name
-            FROM doc_sub_type_master
-            WHERE doc_sub_type_status = 1`,
+                loc_slno,
+                loc_name
+            FROM location_master WHERE loc_status = 1`,
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -97,4 +97,5 @@ module.exports = {
             }
         )
     }
+
 }

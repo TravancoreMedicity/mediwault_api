@@ -1,18 +1,18 @@
 const logger = require('../../logger/logger');
 const {
-    insertSubTypeMaster,
-    checkSubMasterNameDuplicate,
-    editSubTypeMaster,
-    getAllSubTypeMaster,
-    getSubTypeMasterById,
-    selectSubTypeMaster
-} = require('./subTypeMaster.service');
+    insertLocationMaster,
+    selectLocationMaster,
+    updateLocationMaster,
+    deleteLocationMaster,
+    getLocationMasterById,
+    getSelectLocationMasterLIst
+} = require('./location.service');
 
 module.exports = {
-    insertSubTypeMaster: (req, res) => {
+
+    insertLocationMaster: (req, res) => {
         const body = req.body
-        const name = body?.doc_sub_type_name?.trim()
-        checkSubMasterNameDuplicate(name, (error, results) => {
+        insertLocationMaster(body, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -21,37 +21,38 @@ module.exports = {
                 });
             }
 
-            if (results?.length > 0) {
+            if (results) {
                 return res.status(200).json({
-                    success: 2,
-                    message: 'Sub type name already exist'
+                    success: 1,
+                    message: 'successfully Inserted',
+                    data: results
                 });
-            }
-
-            if (results?.length === 0) {
-                insertSubTypeMaster(body, (error, results) => {
-                    if (error) {
-                        logger.error(error)
-                        return res.status(500).json({
-                            success: 0,
-                            message: "Database connection error"
-                        });
-                    }
-
-                    if (results) {
-                        return res.status(200).json({
-                            success: 1,
-                            message: 'successfully Created',
-                            data: results
-                        });
-                    }
-                })
             }
         })
     },
-    editSubTypeMaster: (req, res) => {
+
+    selectLocationMaster: (req, res) => {
+        selectLocationMaster((error, results) => {
+            if (error) {
+                logger.error(error)
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    updateLocationMaster: (req, res) => {
         const body = req.body
-        editSubTypeMaster(body, (error, results) => {
+        updateLocationMaster(body, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -69,27 +70,31 @@ module.exports = {
             }
         })
     },
-    getAllSubTypeMaster: (req, res) => {
-        getAllSubTypeMaster((error, results) => {
-            if (error) {
-                logger.error(error)
-                return res.status(500).json({
-                    success: 0,
-                    message: "Database connection error"
-                });
-            }
 
-            if (results) {
-                return res.status(200).json({
-                    success: 1,
-                    data: results
-                });
-            }
-        })
-    },
-    getSubTypeMasterById: (req, res) => {
+    deleteLocationMaster: (req, res) => {
         const id = req.params.id
-        getSubTypeMasterById(id, (error, results) => {
+        deleteLocationMaster(id, (error, results) => {
+            if (error) {
+                logger.error(error)
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    message: 'successfully Deleted',
+                    data: results
+                });
+            }
+        })
+    },
+
+    getLocationMasterById: (req, res) => {
+        const id = req.params.id
+        getLocationMasterById(id, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -106,8 +111,8 @@ module.exports = {
             }
         })
     },
-    selectSubTypeMaster: (req, res) => {
-        selectSubTypeMaster((error, results) => {
+    getSelectLocationMasterLIst: (req, res) => {
+        getSelectLocationMasterLIst((error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({
@@ -123,5 +128,5 @@ module.exports = {
                 });
             }
         })
-    }
+    },
 }
