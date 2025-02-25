@@ -3,6 +3,8 @@ const logger = require('../../logger/logger')
 
 module.exports = {
     insertUser: (data, callBack) => {
+        // console.log("data service", data);
+
         mysqlpool.query(
             `INSERT INTO user(
                 name,
@@ -17,9 +19,10 @@ module.exports = {
                 is_limited_user,
                 login_method_allowed,
                 created_user,
-                last_passwd_change_date
+                last_passwd_change_date,
+                printer_access
                 )
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
                 data.name,
                 data.mobile,
@@ -33,7 +36,8 @@ module.exports = {
                 data.setOndayLogin,
                 data.loginMethod,
                 data.created_by,
-                data.lastPasswordChangeDate
+                data.lastPasswordChangeDate,
+                data.printerUsability
             ],
             (error, results, fields) => {
                 logger.error(error)
@@ -53,9 +57,12 @@ module.exports = {
                     password = ?,
                     password_validity = ?,
                     user_status = ?,
-                    last_passwd_change_date = ?,
-                    last_login_date = ?,
-                    login_location = ?
+                    sign_in_per_day_count = ?,
+                    is_limited_user = ?,
+                    login_method_allowed = ?,
+                    printer_access=?,
+                    updated_user=?,
+                    updated_time=?
                 WHERE user_slno = ?`,
             [
                 data.name,
@@ -65,10 +72,13 @@ module.exports = {
                 data.password,
                 data.password_Validity,
                 data.user_Status,
-                data.passDateChange,
-                data.lastLoginDate,
-                data.loginLocation,
-                data.userSlno
+                data.signIn_Limit_per_day,
+                data.setOndayLogin,
+                data.loginMethod,
+                data.printerUsability,
+                data.edit_user,
+                data.edit_date,
+                data.user_slno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -114,6 +124,8 @@ module.exports = {
             })
     },
     mobileExist: (mobile, callBack) => {
+        // console.log("mobile", mobile);
+
         mysqlpool.query(
             'SELECT * FROM user WHERE mobile = ?',
             [
@@ -168,7 +180,8 @@ module.exports = {
                 sign_in_per_day_limit,
                 sign_in_per_day_count,
                 is_limited_user,
-                login_method_allowed
+                login_method_allowed,
+                printer_access
             FROM  user 
             WHERE generatedotp = ?
             AND mobile  = ? 
@@ -266,7 +279,8 @@ module.exports = {
                 sign_in_per_day_limit,
                 sign_in_per_day_count,
                 is_limited_user,
-                login_method_allowed
+                login_method_allowed,
+                printer_access
             FROM  user 
             WHERE name = ?
             AND user_status = 1`,
@@ -303,4 +317,54 @@ module.exports = {
                 return callBack(null, results)
             })
     },
+
+    getAllSuperUsers: (callBack) => {
+        mysqlpool.query(
+            'SELECT * FROM user WHERE user.login_type=2',
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    verifyOTPforPrint: (data, callBack) => {
+        // console.log("data", data);
+
+        mysqlpool.query(
+            `SELECT 
+                user_slno,
+                name,
+                login_type,
+                password_validity,
+                last_passwd_change_date,
+                iv,
+                password_validity_expiry_date,
+                last_login_date,
+                sign_in_per_day_limit,
+                sign_in_per_day_count,
+                is_limited_user,
+                login_method_allowed,
+                printer_access
+            FROM  user 
+            WHERE generatedotp = ?
+            AND mobile  = ? 
+            AND user_status = 1`,
+            [
+                data.otp,
+                data.mobile
+            ],
+            (error, results, fields) => {
+                // console.log("results", results);
+
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+
 }
+

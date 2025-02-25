@@ -5,8 +5,8 @@ const fs = require("fs");
 const logger = require("../../logger/logger");
 
 // Define a base directory where all uploads will be stored
-// const baseDirectory = 'D:/DocMeliora/Inteliqo';
-const baseDirectory = "/home/administrator/Desktop/myDevFiles/medfileapp/uploads";
+const baseDirectory = 'D:/DocMeliora/Inteliqo';
+// const baseDirectory = "/home/administrator/Desktop/myDevFiles/medfileapp/uploads";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -32,9 +32,12 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
+    // console.log("multer", file);
+
     const folderNumber = JSON.parse(
       JSON.parse(JSON.stringify(req.body))?.postData
     )?.docNumber;
+    // console.log("folderNumber", folderNumber);
 
     const extension = path.extname(file.originalname);
     const newFileName = `${folderNumber}-${Date.now()}${extension}`;

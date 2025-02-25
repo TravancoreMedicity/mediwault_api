@@ -14,7 +14,9 @@ const {
   getDocTypeCount,
   getDocMasterLikeNameNonSecureOnly,
   getSearchData,
-  updateDocMaster
+  updateDocMaster,
+  updateDocMasterVersion,
+  UpdateActiveStatus, DocDelete, DocApprovals, getNonSecDocMaster
 } = require("./docMaster.service");
 
 const { uploadFile } = require("../multer.config/FileuploadConfig");
@@ -136,6 +138,24 @@ module.exports = {
       });
     });
   },
+
+  getNonSecDocMaster: (req, res) => {
+    getNonSecDocMaster((err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+
   getDocMasterById: (req, res) => {
     const id = req.params.id;
     getDocMasterById(id, (err, results) => {
@@ -252,6 +272,8 @@ module.exports = {
       });
     });
   },
+
+
   getSearchData: (req, res) => {
     const state = req.body
 
@@ -264,6 +286,7 @@ module.exports = {
       { value: state.institute, sql: `AND D.institute = ${state.institute}` },
       { value: state.course, sql: `AND D.course = ${state.course}` },
       { value: state.docNumber, sql: `AND D.doc_id = ${state.docNumber}` },
+      { value: state.fileName, sql: `AND D.doc_name LIKE '%${state.fileName}%'` }
     ]
 
     const array = ObjToArray?.filter(e => e.value !== 0 && e.value !== undefined && e.value !== null)?.map(e => `${e.sql}`).join(" ")
@@ -301,6 +324,8 @@ module.exports = {
                 WHERE D.docStatus = 1 ${array === "" ? 'ORDER BY D.doc_slno DESC' : array}`
 
       getSearchData(sql, (err, results) => {
+        // console.log(results);
+
 
         if (err) {
           logger.error(err);
@@ -326,9 +351,285 @@ module.exports = {
     }
 
   },
+
   updateDocMaster: (req, res) => {
     const body = req.body
     updateDocMaster(body, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+  //Renew Document
+  UpdateRenewDocument: (req, res) => {
+    // console.log(JSON.stringify(req.body))
+    uploadFile(req, res, (err) => {
+      //   const body = req.body;
+      //   console.log(req.files);
+      if (err) {
+        // Multer-specific errors
+        if (err instanceof multer.MulterError) {
+          // Multer error File too large. Max size is 10MB.
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(200).json({
+              success: 0,
+              message: "File too large. Max size is 10MB.",
+            });
+          }
+          // Handle other multer errors here as needed
+          return res.status(200).json({ success: 0, message: err.message });
+        }
+
+        // Custom errors from `checkFileType` or other areas
+        if (
+          err === "Error: Only .png, .jpg, .jpeg and .pdf files are allowed!"
+        ) {
+          return res.status(200).json({ success: 0, message: err });
+        }
+
+        // Unknown error
+        return res.status(200).json({
+          success: 0,
+          message: "An unknown error occurred during file upload.",
+        });
+      }
+
+      const body = JSON.parse(JSON.parse(JSON.stringify(req.body))?.postData);
+      // console.log("body", body);
+
+      const fileInformation = (req.files?.length > 0 && req.files) || [];
+      const postUploadFileData = fileInformation?.map((el) => {
+        return {
+          ...el,
+          docID: body.ren_docID,
+          docNumber: body.docNumber,
+          docVersion: body.ren_docVersion,
+          docVersionAment: body.ren_docVersionAment,
+          docVersionInfoEdit: body.ren_docVersionInfoEdit,
+          docCreatedDate: body.ren_docUpload,
+          docCreatedBy: body.ren_userID
+        };
+      });
+      // update document master Table
+      updateDocMasterVersion(body, (err, results) => {
+        // console.log(body);
+
+        if (err) {
+          logger.error(err);
+          return res.status(500).json({
+            success: 0,
+            message: err,
+          });
+        }
+        else {
+          UpdateActiveStatus(body, (err, results) => {
+            if (err) {
+              logger.error(err);
+              return res.status(500).json({
+                success: 0,
+                message: err,
+              });
+            }
+            else {
+
+
+
+              // insertDocMaster(body, (err, results) => {
+              //   console.log("insertDocMaster body", body);
+
+              //   if (err) {
+              //     logger.error(err);
+              //     return res.status(200).json({
+              //       success: 0,
+              //       message: "Database connection error",
+              //     });
+              //   }
+              if (results) {
+                // INSERT DOCUEMTN DETAILS FILE UPLOAD
+                Promise.all(insertDocDetl(postUploadFileData)).then(() => {
+                  inCrementDocSerialNumber((err, results) => logger.error(err)); //increment file upload doc number
+                  return res.status(200).json({
+                    success: 1,
+                    message: "Document Inserted successfully",
+                  });
+                })
+                  .catch((err) => {
+                    logger.error(err);
+                    return res.status(200).json({
+                      success: 0,
+                      message: err,
+                    });
+                  });
+              } else {
+                return res.status(200).json({
+                  success: 0,
+                  message: "Record not Inserted",
+                });
+              }
+              // });
+            }
+          })
+        }
+        // return res.status(200).json({
+        //   success: 1,
+        //   message: "success",
+        //   data: results,
+        // });
+
+      });
+    });
+  },
+
+
+  DocDelete: (req, res) => {
+    const body = req.body
+    DocDelete(body, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+
+
+  ReplaceDocument: (req, res) => {
+    // console.log(JSON.stringify(req.body))
+    uploadFile(req, res, (err) => {
+      //   const body = req.body;
+      // console.log(req.files);
+      if (err) {
+        // Multer-specific errors
+        if (err instanceof multer.MulterError) {
+          // Multer error File too large. Max size is 10MB.
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(200).json({
+              success: 0,
+              message: "File too large. Max size is 10MB.",
+            });
+          }
+          // Handle other multer errors here as needed
+          return res.status(200).json({ success: 0, message: err.message });
+        }
+
+        // Custom errors from `checkFileType` or other areas
+        if (
+          err === "Error: Only .png, .jpg, .jpeg and .pdf files are allowed!"
+        ) {
+          return res.status(200).json({ success: 0, message: err });
+        }
+
+        // Unknown error
+        return res.status(200).json({
+          success: 0,
+          message: "An unknown error occurred during file upload.",
+        });
+      }
+
+      const body = JSON.parse(JSON.parse(JSON.stringify(req.body))?.postData);
+      // console.log("body", body);
+
+      const fileInformation = (req.files?.length > 0 && req.files) || [];
+      const postUploadFileData = fileInformation?.map((el) => {
+        return {
+          ...el,
+          docID: body.ren_docID,
+          docNumber: body.docNumber,
+          docVersion: body.ren_docVersion,
+          docVersionAment: body.ren_docVersionAment,
+          docVersionInfoEdit: body.ren_docVersionInfoEdit,
+          docCreatedDate: body.ren_docUpload,
+          docCreatedBy: body.ren_userID
+        };
+      });
+      // update document master Table
+      updateDocMasterVersion(body, (err, results) => {
+        // console.log(body);
+
+        if (err) {
+          logger.error(err);
+          return res.status(500).json({
+            success: 0,
+            message: err,
+          });
+        }
+        else {
+          UpdateActiveStatus(body, (err, results) => {
+            if (err) {
+              logger.error(err);
+              return res.status(500).json({
+                success: 0,
+                message: err,
+              });
+            }
+            else {
+
+
+
+              // insertDocMaster(body, (err, results) => {
+              //   console.log("insertDocMaster body", body);
+
+              //   if (err) {
+              //     logger.error(err);
+              //     return res.status(200).json({
+              //       success: 0,
+              //       message: "Database connection error",
+              //     });
+              //   }
+              if (results) {
+                // INSERT DOCUEMTN DETAILS FILE UPLOAD
+                Promise.all(insertDocDetl(postUploadFileData)).then(() => {
+                  inCrementDocSerialNumber((err, results) => logger.error(err)); //increment file upload doc number
+                  return res.status(200).json({
+                    success: 1,
+                    message: "Document Inserted successfully",
+                  });
+                })
+                  .catch((err) => {
+                    logger.error(err);
+                    return res.status(200).json({
+                      success: 0,
+                      message: err,
+                    });
+                  });
+              } else {
+                return res.status(200).json({
+                  success: 0,
+                  message: "Record not Inserted",
+                });
+              }
+              // });
+            }
+          })
+        }
+        // return res.status(200).json({
+        //   success: 1,
+        //   message: "success",
+        //   data: results,
+        // });
+
+      });
+    });
+  },
+  DocApprovals: (req, res) => {
+    const body = req.body
+    DocApprovals(body, (err, results) => {
       if (err) {
         logger.error(err);
         return res.status(500).json({
