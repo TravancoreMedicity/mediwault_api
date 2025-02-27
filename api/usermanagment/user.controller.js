@@ -402,7 +402,7 @@ module.exports = {
         const body = req.body;
         // CHECK USER BASED VALIDATION FIRST CHECK THE PASSWORD CREDENTIAL THEN REST
         userBasedValidationCheck(body, (error, results) => {
-            // console.log("error", error);
+            console.log("error", error);
 
 
             if (error) {
@@ -483,14 +483,15 @@ module.exports = {
                                     name,
                                     accessToken,
                                     login_type,
-                                    printer_access
+                                    printer_accesshttpOnly: true,
+
                                 };
 
                                 res.cookie("accessToken", accessToken, {
-                                    httpOnly: true,
-                                    secure: true,
-                                    maxAge: process.env.COOKIE_TIME, // 15 min
-                                    sameSite: "strict",
+                                    secure: false,// Set to false for HTTP (localhost). Use true for HTTPS (production).
+                                    maxAge: process.env.COOKIE_TIME,// Optional: sets cookie expiry time in milliseconds  15 min
+                                    sameSite: "Lax", // Helps with CSRF protection; strict is better than lax for security reasons
+                                    // in Production change samsite : "None" and the secure:true for  only https 
                                 });
 
                                 res.json({

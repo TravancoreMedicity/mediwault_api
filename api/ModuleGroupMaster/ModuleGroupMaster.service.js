@@ -3,12 +3,13 @@ const logger = require('../../logger/logger')
 
 module.exports = {
     insertModuleGroup: (data, callBack) => {
+        console.log("data", data);
 
-        // SELECT mgro_slno, module_grp_name, module_slno,module_grp_status FROM medivault.module_grp_master;
         mysqlpool.execute(
             `INSERT INTO module_grp_master (module_grp_name, module_slno,module_grp_status) VALUES (?, ?, ?)`,
             [
                 data.module_grp_name,
+                JSON.stringify(data.module_slno),
                 data.module_grp_status
             ],
             (error, results, fields) => {
@@ -40,7 +41,7 @@ module.exports = {
     },
     GetDatas: (callBack) => {
         mysqlpool.query(
-            'SELECT * FROM module_grp_master where module_grp_master.module_grp_status=1;',
+            'SELECT * FROM module_grp_master where module_grp_master.module_grp_status=1',
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)

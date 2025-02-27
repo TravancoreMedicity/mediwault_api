@@ -5,7 +5,7 @@ const { insertModuleGroup, GetDatas, validateModuleNameExcistOrNot } = require('
 module.exports = {
     insertModuleGroup: (req, res) => {
         const body = req.body;
-
+        // console.log("body", body);
         validateModuleNameExcistOrNot(body, (error, results) => {
             if (error) {
                 logger.error(error);
