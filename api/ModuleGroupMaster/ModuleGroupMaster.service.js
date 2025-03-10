@@ -3,12 +3,10 @@ const logger = require('../../logger/logger')
 
 module.exports = {
     insertModuleGroup: (data, callBack) => {
-        console.log("data", data);
-
         mysqlpool.execute(
-            `INSERT INTO module_grp_master (module_grp_name, module_slno,module_grp_status) VALUES (?, ?, ?)`,
+            `INSERT INTO module_grp_master (module_user_type, module_slno,module_grp_status) VALUES (?, ?, ?)`,
             [
-                data.module_grp_name,
+                data.module_user_type,
                 JSON.stringify(data.module_slno),
                 data.module_grp_status
             ],
@@ -24,11 +22,11 @@ module.exports = {
     validateModuleNameExcistOrNot: (data, callBack) => {
         mysqlpool.query(
             `SELECT 
-                module_grp_name
+                module_user_type
             FROM module_grp_master 
-            WHERE module_grp_name = ?`,
+            WHERE module_user_type = ?`,
             [
-                data.module_grp_name
+                data.module_user_type
             ],
             (error, results, fields) => {
                 if (error) {
@@ -41,7 +39,7 @@ module.exports = {
     },
     GetDatas: (callBack) => {
         mysqlpool.query(
-            'SELECT * FROM module_grp_master where module_grp_master.module_grp_status=1',
+            'SELECT * FROM module_grp_master ',
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -50,4 +48,28 @@ module.exports = {
                 return callBack(null, results)
             })
     },
+
+    EditModuleGroup: (data, callBack) => {
+        mysqlpool.query(
+            `UPDATE module_grp_master 
+                SET module_user_type = ?,
+                    module_slno = ?,
+                    module_grp_status = ?
+                WHERE mgro_slno = ?`,
+            [
+                data.module_user_type,
+                JSON.stringify(data.module_slno),
+                data.module_grp_status,
+                data.module_grp_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error);
+                    return callBack(error);
+                }
+                return callBack(null, results);
+            }
+        );
+    },
+
 }

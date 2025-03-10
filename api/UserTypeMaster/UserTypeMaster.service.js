@@ -41,7 +41,7 @@ module.exports = {
     },
     GetDatas: (callBack) => {
         mysqlpool.query(
-            'SELECT * FROM user_type_master where user_type_master.use_type_status=1',
+            'SELECT * FROM user_type_master',
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -49,6 +49,28 @@ module.exports = {
                 }
                 return callBack(null, results)
             })
+    },
+    editUserType: (data, callBack) => {
+
+        mysqlpool.query(
+            `UPDATE user_type_master 
+                SET user_type = ?,
+                    use_type_status = ?
+                WHERE user_type_slno = ?`,
+            [
+                data.user_type,
+                data.user_type_status,
+                data.user_type_slno
+
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error);
+                    return callBack(error);
+                }
+                return callBack(null, results);
+            }
+        );
     },
 }
 

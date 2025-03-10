@@ -1,6 +1,6 @@
 const logger = require('../../logger/logger');
 
-const { insertUserType, GetDatas, validateUserTypeExcistOrNot } = require('./UserTypeMaster.service');
+const { insertUserType, GetDatas, validateUserTypeExcistOrNot, editUserType } = require('./UserTypeMaster.service');
 
 module.exports = {
     insertUserType: (req, res) => {
@@ -22,7 +22,6 @@ module.exports = {
                 });
             }
             insertUserType(body, (error, results) => {
-
                 if (error) {
                     logger.error(error);
                     return res.status(200).json({
@@ -54,6 +53,22 @@ module.exports = {
                 });
             }
 
+            return res.status(200).json({
+                success: 1,
+                data: results,
+            });
+        });
+    },
+    editUserType: (req, res) => {
+        const body = req.body;
+        editUserType(body, (error, results) => {
+            if (error) {
+                logger.error(error);
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error",
+                });
+            }
             return res.status(200).json({
                 success: 1,
                 data: results,

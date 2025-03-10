@@ -1,11 +1,10 @@
 const logger = require('../../logger/logger');
 
-const { InsertMenuName, GetDatas, validateMenuNameExcistOrNot } = require('./MenuNameMaster.service');
+const { InsertMenuName, GetDatas, validateMenuNameExcistOrNot, UpdateMenuName } = require('./MenuNameMaster.service');
 
 module.exports = {
     InsertMenuName: (req, res) => {
         const body = req.body;
-
         validateMenuNameExcistOrNot(body, (error, results) => {
             if (error) {
                 logger.error(error);
@@ -54,6 +53,22 @@ module.exports = {
                 });
             }
 
+            return res.status(200).json({
+                success: 1,
+                data: results,
+            });
+        });
+    },
+    UpdateMenuName: (req, res) => {
+        const body = req.body;
+        UpdateMenuName(body, (error, results) => {
+            if (error) {
+                logger.error(error);
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error",
+                });
+            }
             return res.status(200).json({
                 success: 1,
                 data: results,

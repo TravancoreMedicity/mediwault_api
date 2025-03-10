@@ -1,11 +1,10 @@
 const logger = require('../../logger/logger');
 
-const { insertModuleGroup, GetDatas, validateModuleNameExcistOrNot } = require('./ModuleGroupMaster.service');
+const { insertModuleGroup, GetDatas, validateModuleNameExcistOrNot, EditModuleGroup } = require('./ModuleGroupMaster.service');
 
 module.exports = {
     insertModuleGroup: (req, res) => {
         const body = req.body;
-        // console.log("body", body);
         validateModuleNameExcistOrNot(body, (error, results) => {
             if (error) {
                 logger.error(error);
@@ -46,7 +45,6 @@ module.exports = {
                     message: "Database connection error",
                 });
             }
-
             if (results?.length === 0) {
                 return res.status(200).json({
                     success: 2,
@@ -54,6 +52,22 @@ module.exports = {
                 });
             }
 
+            return res.status(200).json({
+                success: 1,
+                data: results,
+            });
+        });
+    },
+    EditModuleGroup: (req, res) => {
+        const body = req.body;
+        EditModuleGroup(body, (error, results) => {
+            if (error) {
+                logger.error(error);
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error",
+                });
+            }
             return res.status(200).json({
                 success: 1,
                 data: results,

@@ -16,7 +16,7 @@ const {
   getSearchData,
   updateDocMaster,
   updateDocMasterVersion,
-  UpdateActiveStatus, DocDelete, DocApprovals, getNonSecDocMaster
+  UpdateActiveStatus, DocDelete, DocApprovals, getNonSecDocMaster, getDocMasterByTypeId
 } = require("./docMaster.service");
 
 const { uploadFile } = require("../multer.config/FileuploadConfig");
@@ -155,7 +155,6 @@ module.exports = {
       });
     });
   },
-
   getDocMasterById: (req, res) => {
     const id = req.params.id;
     getDocMasterById(id, (err, results) => {
@@ -630,6 +629,24 @@ module.exports = {
   DocApprovals: (req, res) => {
     const body = req.body
     DocApprovals(body, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+
+  getDocMasterByTypeId: (req, res) => {
+    const id = req.params.id;
+    getDocMasterByTypeId(id, (err, results) => {
       if (err) {
         logger.error(err);
         return res.status(500).json({

@@ -77,6 +77,7 @@ const ModuleGroupMaster = require("./api/ModuleGroupMaster/ModuleGroupMaster.rou
 const MenuNameMaster = require("./api/MenuNameMaster/MenuNameMaster.router")
 const UserTypeMaster = require("./api/UserTypeMaster/UserTypeMaster.router");
 const ModuleNameMaster = require("./api/ModuleNameMaster/ModuleNameMaster.router");
+const UserGroupRightMaster = require("./api/UserGroupRightMaster/UserGroupRightMaster.router")
 
 app.get("/api/generateOTP/:id", generateOTP); // generate OTP function
 app.get("/api/validateToken", validateToken);
@@ -100,6 +101,7 @@ app.use("/api/ModuleGroupMaster", ModuleGroupMaster)
 app.use("/api/MenuNameMaster", MenuNameMaster)
 app.use("/api/ModuleNameMaster", ModuleNameMaster)
 app.use("/api/UserTypeMaster", UserTypeMaster)
+app.use("/api/UserGroupRightMaster", UserGroupRightMaster)
 
 
 // io.on("connection", (socket) => {

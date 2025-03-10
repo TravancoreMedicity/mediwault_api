@@ -47,4 +47,15 @@ module.exports = {
                 return callBack(null, results)
             })
     },
+    GetAllModules: (callBack) => {
+        mysqlpool.query(
+            'SELECT * FROM module_name ',
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
 }

@@ -3,8 +3,6 @@ const logger = require('../../logger/logger')
 
 module.exports = {
     InsertMenuName: (data, callBack) => {
-        console.log("data", data);
-
         mysqlpool.execute(
             `INSERT INTO menu_name ( menu_name, menu_module, menu_status) VALUES ( ?, ?, ?)`,
             [
@@ -41,7 +39,7 @@ module.exports = {
     },
     GetDatas: (callBack) => {
         mysqlpool.query(
-            'SELECT * FROM menu_name where menu_name.menu_status=1',
+            'SELECT * FROM menu_name',
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -49,5 +47,29 @@ module.exports = {
                 }
                 return callBack(null, results)
             })
+    },
+    UpdateMenuName: (data, callBack) => {
+        console.log("service", data);
+
+        mysqlpool.query(
+            `UPDATE menu_name 
+                SET menu_name = ?,
+                menu_module=?,
+                    menu_status = ?
+                WHERE menu_slno = ?`,
+            [
+                data.Menu_name,
+                data.module_name,
+                data.Menu_status,
+                data.Menu_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error);
+                    return callBack(error);
+                }
+                return callBack(null, results);
+            }
+        );
     },
 }
