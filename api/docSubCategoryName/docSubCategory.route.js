@@ -5,13 +5,14 @@ const {
     insertDocSubCategory,
     editDocSubCategory,
     getAllDocSubCategory,
-    getSubCategoryList
+    getSubCategoryList, getSubCategoryById
 } = require('./docSubCategory.controller');
 
 
 router.post('/insertDocSubCategory', verifyToken, insertDocSubCategory);
 router.patch('/editDocSubCategory', verifyToken, editDocSubCategory);
 router.get('/getAllDocSubCategory', verifyToken, getAllDocSubCategory);
-router.get('/getSubCategoryList', verifyToken, getSubCategoryList)
+router.get('/getSubCategoryList', verifyToken, getSubCategoryList);
+router.get('/getSubCategoryById/:catSlno', verifyToken, getSubCategoryById);
 
 module.exports = router

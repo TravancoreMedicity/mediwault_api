@@ -5,7 +5,7 @@ const {
     editDocSubCategory,
     getAllDocSubCategory,
     subCategoryNameDuplicateCheck,
-    getSubCategoryList
+    getSubCategoryList, getSubCategoryById
 } = require('./docSubCategory.service');
 
 module.exports = {
@@ -101,5 +101,23 @@ module.exports = {
                 data: results
             })
         })
-    }
+    },
+    getSubCategoryById: (req, res) => {
+        const id = req.params.catSlno
+        getSubCategoryById(id, (error, results) => {
+            if (error) {
+                logger.error(error)
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
 }
