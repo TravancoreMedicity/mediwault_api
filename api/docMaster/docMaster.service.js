@@ -29,9 +29,12 @@ module.exports = {
                 docVer_amentment,
                 dovVer_infoAment,
                 uploadUser,
-                uploadDate
+                uploadDate,
+                short_name,
+                lifelong_validity,
+                days_torenew
             ) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         data.docID,
         data.docNumber,
@@ -57,7 +60,10 @@ module.exports = {
         data.docVersionAment,
         data.docVersionInfoEdit,
         data.userID,
-        data.docUpload
+        data.docUpload,
+        data.shortName,
+        data.lifeLongValidity,
+        data.DaysToRenew
       ],
       (error, results, fields) => {
         if (error) {
@@ -89,7 +95,9 @@ module.exports = {
           D.doc_date,
           D.doc_ver_date,
           D.apprvl_status,
-          D.isSecure
+          D.isSecure,
+          D.category,
+          D.doc_sub_type
       FROM document_master D
       LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
       LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -267,7 +275,13 @@ module.exports = {
             D.uploadDate,
             D.apprvl_status,
             D.apprvl_user,
-            D.apprvl_date
+            D.apprvl_date,
+            D.short_name,
+            D.lifelong_validity,
+            D.days_torenew,
+            D.short_name,
+            D.lifelong_validity,
+            D.days_torenew
         FROM document_master D
       LEFT JOIN doc_main_type T ON T.main_type_slno = D.doc_type
             LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -393,6 +407,53 @@ module.exports = {
       }
     );
   },
+  // insertDocDetl: (data) =>
+  //   data?.map(
+  //     (item) =>
+  //       new Promise((resolve, reject) => {
+  //         // console.log("insertDocDetl item", item);
+
+  //         mysqlpool.query(
+  // `INSERT INTO document_detl (
+  //     doc_id,
+  //     doc_number,
+  //     originalname,
+  //     mimetype,
+  //     filename,
+  //     docVer,
+  //     docVer_amentment,
+  //     dovVer_infoAment,
+  //     docVerDate,
+  //     docCreatedDate,
+  //     docCreateUser
+  //   ) 
+  //   VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+  // [
+  //   item.docID,
+  //   item.docNumber,
+  //   item.originalname,
+  //   item.mimetype,
+  //   item.filename,
+  //   item.docVersion,
+  //   item.docVersionAment,
+  //   item.docVersionInfoEdit,
+  //   item.docCreatedDate,
+  //   item.docCreatedDate,
+  //   item.docCreatedBy
+  // ],
+  //           (error, results, fields) => {
+  //             if (error) {
+  //               logger.error(error);
+  //               return reject(error);
+  //             }
+  //             return resolve(results);
+  //           }
+  //         );
+  //       })
+  //   ),
+
+
+
   insertDocDetl: (data) =>
     data?.map(
       (item) =>
@@ -427,16 +488,54 @@ module.exports = {
               item.docCreatedDate,
               item.docCreatedBy
             ],
-            (error, results, fields) => {
-              if (error) {
-                logger.error(error);
-                return reject(error);
-              }
-              return resolve(results);
+            (error, results) => {
+              if (error) return reject(error);
+
+
+
+              // Now insert into log
+              mysqlpool.query(
+                `INSERT INTO document_detl_log (
+                 doc_id,
+                  doc_number,
+                   originalname,
+                    mimetype,
+                     filename,
+                      docVer,
+                       docVer_amentment,
+                        docVer_infoAment,
+                         docVerDate,
+                          docCreatedDate,
+                           docCreateUser,
+                            
+                                create_user
+              ) 
+              VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+                [
+                  item.docID,
+                  item.docNumber,
+                  item.originalname,
+                  item.mimetype,
+                  item.filename,
+                  item.docVersion,
+                  item.docVersionAment,
+                  item.docVersionInfoEdit,
+                  item.docCreatedDate,
+                  item.docCreatedDate,
+                  item.docCreatedBy,
+                  item.docCreatedBy
+                ], // use the same or copied data
+                (logError, logResults) => {
+                  if (logError) return reject(logError);
+                  return resolve(logResults);
+                }
+              );
             }
           );
         })
     ),
+
+
   getDocDetlinfo: (id, callBack) => {
     mysqlpool.query(
       `SELECT
@@ -456,7 +555,7 @@ module.exports = {
           D.docActiveStatus
       FROM document_detl D
       LEFT JOIN user U ON U.user_slno = D.docCreateUser
-      WHERE doc_id = ? ORDER BY D.docActiveStatus ASC`,
+      WHERE doc_id = ? ORDER BY D.docActiveStatus ASC ,D.docVer DESC, D.docVer_amentment DESC`,
       [id],
       (error, results, fields) => {
         if (error) {
@@ -501,6 +600,8 @@ module.exports = {
   },
 
   updateDocMaster: (data, callBack) => {
+    // console.log("data:::::::::::", data);
+
     mysqlpool.query(
       `UPDATE document_master 
         SET 
@@ -523,6 +624,9 @@ module.exports = {
           doc_exp_end = ?,
           isRequiredExp = ?,
           isSecure = ?,
+          short_name=?,
+          lifelong_validity=?,
+          days_torenew=?,
           editUser = ?,
           editDate = ?
         WHERE doc_id = ? `,
@@ -546,9 +650,14 @@ module.exports = {
         data.docExpEnd,
         data.isRequiredExp,
         data.isSecure,
+        data.short_name,
+        data.lifelong_validity,
+        data.days_torenew,
         data.userID,
         data.docEditDate,
         data.docID,
+
+        // docVersionInfoEdit
       ],
       (error, results, fields) => {
         if (error) {
@@ -559,6 +668,43 @@ module.exports = {
       }
     );
   },
+
+  //update detail master
+
+
+  updateDetailTableVals: (data, callBack) => {
+
+
+    mysqlpool.query(
+      `UPDATE document_detl 
+        SET 
+          dovVer_infoAment=?,
+          docEditDate=?,
+          docEditUser=?,
+          docAmentDate=?,
+          docAmentUser=?
+        WHERE doc_id = ?  `,
+      [
+        data.docVersionInfoEdit,
+        data.docEditDate,
+        data.userID,
+        data.docEditDate,
+        data.userID,
+        data.docID,
+      ],
+      (error, results, fields) => {
+        if (error) {
+
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+
+
+
   //update renewdoc
 
   updateDocMasterVersion: (data, callBack) => {
@@ -599,9 +745,9 @@ module.exports = {
       `UPDATE document_detl 
         SET 
           docActiveStatus = 1
-        WHERE doc_id = ?`,
+        WHERE docd_slno = ?`,
       [
-        data.ren_docID,
+        data.document_slno,
       ],
       (error, results, fields) => {
         if (error) {
@@ -728,4 +874,19 @@ SELECT
       }
     );
   },
+
+  selectmainCategories: (callBack) => {
+    mysqlpool.query(
+      `SELECT sub_type_slno, doc_sub_type_name, doc_sub_type_status FROM doc_sub_type_master where doc_sub_type_status=1`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+
 };

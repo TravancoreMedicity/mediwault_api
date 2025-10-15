@@ -58,4 +58,25 @@ module.exports = {
                 return callBack(null, results)
             })
     },
+    UpdateModuleName: (data, callBack) => {
+        // console.log("service", data);
+
+        mysqlpool.query(
+            `  UPDATE bis_module_name 
+                SET bis_module_name = ?,
+                bis_module_status = ?
+                WHERE bis_module_slno = ?`,
+            [
+                data.module_name,
+                data.module_status,
+                data.module_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error);
+                }
+                return callBack(null, results);
+            }
+        );
+    },
 }

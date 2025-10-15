@@ -49,7 +49,7 @@ module.exports = {
             })
     },
     UpdateMenuName: (data, callBack) => {
-        console.log("service", data);
+        // console.log("service", data);
 
         mysqlpool.query(
             `UPDATE menu_name 

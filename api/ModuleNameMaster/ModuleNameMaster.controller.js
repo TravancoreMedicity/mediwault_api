@@ -1,6 +1,6 @@
 const logger = require('../../logger/logger');
 
-const { insertModuleName, GetDatas, validateModuleNameExcistOrNot, GetAllModules } = require('./ModuleNameMaster.service');
+const { insertModuleName, GetDatas, validateModuleNameExcistOrNot, GetAllModules, UpdateModuleName } = require('./ModuleNameMaster.service');
 
 module.exports = {
     insertModuleName: (req, res) => {
@@ -77,6 +77,22 @@ module.exports = {
                 });
             }
 
+            return res.status(200).json({
+                success: 1,
+                data: results,
+            });
+        });
+    },
+    UpdateModuleName: (req, res) => {
+        const body = req.body;
+        UpdateModuleName(body, (error, results) => {
+            if (error) {
+                logger.error(error);
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error",
+                });
+            }
             return res.status(200).json({
                 success: 1,
                 data: results,

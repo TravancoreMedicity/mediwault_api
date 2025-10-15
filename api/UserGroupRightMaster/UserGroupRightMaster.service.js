@@ -38,8 +38,6 @@ module.exports = {
     },
 
     ModulewiseMenus: (id, callBack) => {
-        // console.log("Service", id);
-
         mysqlpool.query(
             `
              SELECT  module_slno
@@ -160,8 +158,6 @@ module.exports = {
         )
     },
     UserWiseSettingsRights: (id, callBack) => {
-        // console.log("Service", id);
-
         mysqlpool.query(
             `
              Select group_rights_slno, user_group_slno, module_slno, user_group_rights.menu_slno, menu_view, menu_add, menu_edit,menu_name.menu_name

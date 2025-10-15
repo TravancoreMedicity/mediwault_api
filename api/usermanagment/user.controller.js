@@ -157,10 +157,8 @@ module.exports = {
     },
     generateOTP: async (req, res) => {
         const mobileNumber = req.params.id;
-        // console.log("mobileNumber", mobileNumber);
 
         const trimmedNumber = mobileNumber.slice(2);
-        // console.log("trimmedNumber", trimmedNumber);
 
         // First check mobile number registerd or not
         mobileExist(trimmedNumber, (error, results) => {
@@ -194,6 +192,7 @@ module.exports = {
                         return res.status(200).json({
                             success: 2,
                             message: "OTP sent successfully",
+                            otp: otp
                         });
 
                         // axios
@@ -237,8 +236,6 @@ module.exports = {
             }
             if (results.length > 0) {
                 const userData = results[0];
-                // console.log(userData);
-
 
                 const {
                     user_slno,
@@ -321,9 +318,7 @@ module.exports = {
     },
     getRefershToken: (req, res) => {
         const id = req.params.id;
-        // console.log(id)
         getRefershToken(id, (error, results) => {
-            // console.log(error)
 
             if (error) {
                 logger.error(error);
@@ -352,7 +347,6 @@ module.exports = {
             }
 
             if (results.length > 0) {
-                // console.log(results[0].token)
                 const refreshToken = results[0].token;
 
                 jwt.verify(
@@ -375,9 +369,9 @@ module.exports = {
                             const newAccessToken = jwt.sign({ id: id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
                             res.cookie("accessToken", newAccessToken, {
                                 httpOnly: true,
-                                secure: true,
+                                secure: false,
                                 maxAge: process.env.COOKIE_TIME, // 15 min
-                                sameSite: "strict",
+                                sameSite: "lax",
                             });
                             res.json({ message: "revalidated" });
                         }
@@ -402,8 +396,6 @@ module.exports = {
         const body = req.body;
         // CHECK USER BASED VALIDATION FIRST CHECK THE PASSWORD CREDENTIAL THEN REST
         userBasedValidationCheck(body, (error, results) => {
-            console.log("error", error);
-
 
             if (error) {
                 logger.error(error);
@@ -489,7 +481,7 @@ module.exports = {
 
 
                                 res.cookie("accessToken", accessToken, {
-                                    secure: false,// Set to false for HTTP (localhost). Use true for HTTPS (production).
+                                    secure: true,// Set to false for HTTP (localhost). Use true for HTTPS (production).
                                     maxAge: process.env.COOKIE_TIME,// Optional: sets cookie expiry time in milliseconds  15 min
                                     sameSite: "Lax", // Helps with CSRF protection; strict is better than lax for security reasons
                                     // in Production change samsite : "None" and the secure:true for  only https 
@@ -540,8 +532,6 @@ module.exports = {
 
     verifyOTPforPrint: async (req, res) => {
         const body = req.body;
-        // console.log("controller", body);
-
         verifyOTPforPrint(body, async (error, results) => {
             if (error) {
                 logger.error(error);

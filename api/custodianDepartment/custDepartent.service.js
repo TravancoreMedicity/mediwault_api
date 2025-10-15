@@ -1,4 +1,5 @@
 const mysqlpool = require('../../config/dbConfig')
+const hrm_pool = require('../../config/hrm_dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
@@ -108,5 +109,17 @@ module.exports = {
                 return callBack(null, results)
             }
         )
-    }
+    },
+    selectHrDeptDetails: (callBack) => {
+        hrm_pool.query(
+            `SELECT dept_id, dept_name, dept_alias, dept_status, dept_type FROM medi_hrm.hrm_department where dept_status=1 ORDER BY dept_name ASC`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
 }

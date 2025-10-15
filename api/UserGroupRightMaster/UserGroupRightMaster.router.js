@@ -4,7 +4,7 @@ const { verifyToken } = require('../tokenValidation/tokenValidation');
 const { getModulewiseMenus, ModulewiseMenus, createGroupRights, updateGroupMenuRits, UserWiseSettingsRights } = require('./UserGroupRightMaster.controller');
 
 router.get('/getModulewiseMenus/:id', verifyToken, getModulewiseMenus)
-router.get("/ModulewiseMenus/:module_name", verifyToken, ModulewiseMenus);
+router.get("/ModulewiseMenus/:logId", verifyToken, ModulewiseMenus);
 //new try
 router.post("/", verifyToken, createGroupRights)
 router.patch("/", verifyToken, updateGroupMenuRits)

@@ -30,7 +30,7 @@ module.exports = {
         });
     },
     ModulewiseMenus: (req, res) => {
-        const id = req.params.module_name;
+        const id = req.params.logId;
         ModulewiseMenus(id, (error, results) => {
             if (error) {
                 logger.error(error);
@@ -269,8 +269,6 @@ module.exports = {
 
     UserWiseSettingsRights: (req, res) => {
         const id = req.params.loggedUser;
-        // console.log(" req.params.", req.params);
-
         UserWiseSettingsRights(id, (error, results) => {
             if (error) {
                 logger.error(error);

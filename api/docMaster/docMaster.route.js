@@ -12,7 +12,7 @@ const {
   getDocTypeCount,
   getDocMasterLikeNameNonSecureOnly,
   getSearchData,
-  updateDocMaster, UpdateRenewDocument, DocDelete, ReplaceDocument, DocApprovals, getNonSecDocMaster, getDocMasterByTypeId
+  updateDocMaster, UpdateRenewDocument, DocDelete, ReplaceDocument, DocApprovals, getNonSecDocMaster, getDocMasterByTypeId, getFiles, getFilesall, selectmainCategories
 } = require("./docMaster.controller");
 
 router.post("/insertDocMaster", verifyToken, insertDocMaster);
@@ -32,6 +32,12 @@ router.patch("/ReplaceDocument", verifyToken, ReplaceDocument);
 router.patch("/DocApproval", verifyToken, DocApprovals);
 router.get("/getNonSecDocMaster", verifyToken, getNonSecDocMaster);
 router.get("/getDocMasterByTypeId/:id", verifyToken, getDocMasterByTypeId);
+
+router.get("/getFiles/:docId/:fname", verifyToken, getFiles);
+router.get("/getFilesall/:docId", verifyToken, getFilesall);
+
+
+router.get("/selectmainCategories", verifyToken, selectmainCategories);
 
 module.exports = router;
 

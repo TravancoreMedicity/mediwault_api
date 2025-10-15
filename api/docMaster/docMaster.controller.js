@@ -16,11 +16,14 @@ const {
   getSearchData,
   updateDocMaster,
   updateDocMasterVersion,
-  UpdateActiveStatus, DocDelete, DocApprovals, getNonSecDocMaster, getDocMasterByTypeId
+  UpdateActiveStatus, DocDelete, DocApprovals, getNonSecDocMaster, getDocMasterByTypeId, updateDetailTableVals, selectmainCategories
 } = require("./docMaster.service");
 
 const { uploadFile } = require("../multer.config/FileuploadConfig");
 const multer = require("multer");
+const archiver = require('archiver');
+const fs = require("fs")
+const path = require('path');
 
 module.exports = {
   insertDocMaster: (req, res) => {
@@ -276,6 +279,7 @@ module.exports = {
   getSearchData: (req, res) => {
     const state = req.body
 
+
     const ObjToArray = [
       { value: state.docType, sql: `AND D.doc_type = ${state.docType}` },
       { value: state.subType, sql: `AND D.doc_sub_type = ${state.subType}` },
@@ -285,8 +289,12 @@ module.exports = {
       { value: state.institute, sql: `AND D.institute = ${state.institute}` },
       { value: state.course, sql: `AND D.course = ${state.course}` },
       { value: state.docNumber, sql: `AND D.doc_id = ${state.docNumber}` },
-      { value: state.fileName, sql: `AND D.doc_name LIKE '%${state.fileName}%'` }
+      { value: state.fileName, sql: `AND D.doc_name LIKE '%${state.fileName}%'` },
+      { value: state.shortName, sql: `AND D.short_name LIKE '%${state.shortName}%'` }
+
+
     ]
+
 
     const array = ObjToArray?.filter(e => e.value !== 0 && e.value !== undefined && e.value !== null)?.map(e => `${e.sql}`).join(" ")
 
@@ -311,7 +319,8 @@ module.exports = {
                     G.group_name,
                     D.doc_date,
                     D.doc_ver_date,
-                    D.isSecure
+                    D.isSecure,
+                    D.short_name
                 FROM document_master D
                     LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
                     LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -353,6 +362,8 @@ module.exports = {
 
   updateDocMaster: (req, res) => {
     const body = req.body
+    // console.log("body:", body);
+
     updateDocMaster(body, (err, results) => {
       if (err) {
         logger.error(err);
@@ -361,13 +372,41 @@ module.exports = {
           message: "Database connection error",
         });
       }
-      return res.status(200).json({
-        success: 1,
-        message: "success",
-        data: results,
-      });
+      else {
+        // updateDetailTableVals(body, (err, results) => {
+        //   console.log(results);
+        //   if (err) {
+        //     logger.error(err);
+        //     return res.status(500).json({
+        //       success: 0,
+        //       message: "Database connection error",
+        //     });
+        //   }
+        //   return res.status(200).json({
+        //     success: 1,
+        //     message: "success",
+        //     data: results,
+        //   });
+        // });
+
+        updateDetailTableVals(body, (err, results) => {
+          if (err) {
+            logger.error(err);
+            return res.status(500).json({
+              success: 0,
+              message: "Database connection error",
+            });
+          }
+          return res.status(200).json({
+            success: 1,
+            message: "success",
+            data: results,
+          });
+        });
+      }
     });
   },
+
   //Renew Document
   UpdateRenewDocument: (req, res) => {
     // console.log(JSON.stringify(req.body))
@@ -554,7 +593,7 @@ module.exports = {
           docVersionAment: body.ren_docVersionAment,
           docVersionInfoEdit: body.ren_docVersionInfoEdit,
           docCreatedDate: body.ren_docUpload,
-          docCreatedBy: body.ren_userID
+          docCreatedBy: body.ren_userID,
         };
       });
       // update document master Table
@@ -661,4 +700,144 @@ module.exports = {
       });
     });
   },
+
+  //getFiles
+  // getFiles: (req, res) => {
+  //   const id = req.params.docId;
+  //   const fname = req.params.fname
+  //   console.log("fname::", fname);
+
+  //   // const folderPath = path.join('D:/DocMeliora/Meliora/CRF/crf_registration', id);
+  //   const folderPath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+  //   console.log(folderPath, "folderPath");
+
+  //   fs.readdir(folderPath, (err, files) => {
+  //     console.log("err:", err);
+  //     console.log("files:", files);
+
+  //     if (err) {
+  //       console.error(err);
+  //       return res.status(200).json({
+  //         success: 0,
+  //         message: err.message,
+  //       });
+  //     }
+  //     else if (!files || files.length === 0) {
+  //       // No images found
+  //       return res.status(200).json({
+  //         success: 1,
+  //         data: [] // or files if you prefer to return the empty array
+  //       });
+  //     }
+  //     else {
+  //       // Otherwise, create the ZIP archive and pipe it
+  //       res.setHeader('Content-Type', 'application/zip');
+  //       res.setHeader('Content-Disposition', `attachment; filename="${id}_images.zip"`);
+  //       const archive = archiver('zip', { zlib: { level: 9 } });
+  //       archive.on('error', (archiveErr) => {
+  //         console.error('Archive error:', archiveErr);
+  //         res.status(500).json({ success: 0, message: archiveErr.message });
+  //       });
+  //       archive.pipe(res);
+  //       // Optionally, filter for image extensions only
+  //       files.forEach((filename) => {
+  //         const filePath = path.join(folderPath, filename);
+  //         archive.file(filePath, { name: filename });
+  //       });
+  //       archive.finalize();
+  //     }
+  //   });
+  // },
+  getFiles: (req, res) => {
+    const id = req.params.docId;
+    const fname = req.params.fname;
+    // console.log("fname::", fname);
+
+    const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+    // console.log(filePath, "filePath");
+
+    // Check if file exists
+    fs.stat(filePath, (err, stats) => {
+      if (err || !stats.isFile()) {
+        console.error(err);
+        return res.status(200).json({
+          success: 0,
+          message: err ? err.message : 'File not found',
+        });
+      }
+
+      // Set headers to send zip
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${id}_image.zip"`);
+
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      archive.on('error', (archiveErr) => {
+        console.error('Archive error:', archiveErr);
+        res.status(500).json({ success: 0, message: archiveErr.message });
+      });
+
+      archive.pipe(res);
+
+      // Add the single file
+      archive.file(filePath, { name: fname });
+
+      archive.finalize();
+    });
+  },
+  getFilesall: (req, res) => {
+    const id = req.params.docId;
+    // const folderPath = path.join('D:/DocMeliora/Meliora/CRF/crf_registration', id);
+    const folderPath = `F:/DocMeliora/Inteliqo/${id}`;
+    fs.readdir(folderPath, (err, files) => {
+      if (err) {
+        console.error(err);
+        return res.status(200).json({
+          success: 0,
+          message: err.message,
+        });
+      }
+      else if (!files || files.length === 0) {
+        // No images found
+        return res.status(200).json({
+          success: 1,
+          data: [] // or files if you prefer to return the empty array
+        });
+      }
+      else {
+        // Otherwise, create the ZIP archive and pipe it
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${id}_images.zip"`);
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        archive.on('error', (archiveErr) => {
+          console.error('Archive error:', archiveErr);
+          res.status(500).json({ success: 0, message: archiveErr.message });
+        });
+        archive.pipe(res);
+        // Optionally, filter for image extensions only
+        files.forEach((filename) => {
+          const filePath = path.join(folderPath, filename);
+          archive.file(filePath, { name: filename });
+        });
+        archive.finalize();
+      }
+    });
+  },
+
+  selectmainCategories: (req, res) => {
+    selectmainCategories((err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+
 };
