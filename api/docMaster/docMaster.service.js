@@ -15,6 +15,7 @@ module.exports = {
                 course,
                 category,
                 sub_category,
+                nested_category,
                 group_mast,
                 doc_date,
                 doc_ver_date,
@@ -34,7 +35,7 @@ module.exports = {
                 lifelong_validity,
                 days_torenew
             ) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         data.docID,
         data.docNumber,
@@ -46,6 +47,7 @@ module.exports = {
         data.course,
         data.category,
         data.subCategory,
+        data.nestedCategory,
         data.group,
         data.docDate,
         data.docVersionDate,
@@ -97,7 +99,9 @@ module.exports = {
           D.apprvl_status,
           D.isSecure,
           D.category,
-          D.doc_sub_type
+          D.doc_sub_type,
+          D.nested_category,
+          J.nested_cat_name
       FROM document_master D
       LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
       LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -106,6 +110,7 @@ module.exports = {
       LEFT JOIN doc_category_master A ON A.cat_slno = D.category
       LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
       LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+      LEFT JOIN doc_nested_cat_mast J ON J.nested_cat_slno = D.nested_category
       WHERE D.docStatus = 1`,
       [],
       (error, results, fields) => {
@@ -281,7 +286,9 @@ module.exports = {
             D.days_torenew,
             D.short_name,
             D.lifelong_validity,
-            D.days_torenew
+            D.days_torenew,
+            D.nested_category,
+            J.nested_cat_name
         FROM document_master D
       LEFT JOIN doc_main_type T ON T.main_type_slno = D.doc_type
             LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -294,6 +301,7 @@ module.exports = {
             LEFT JOIN location_master LM ON LM.loc_slno = R.loc_slno
             LEFT JOIN custodian_master CN ON CN.cust_slno = D.docCustodian
             LEFT JOIN user U ON U.user_slno = D.uploadUser
+            LEFT JOIN doc_nested_cat_mast J ON J.nested_cat_slno = D.nested_category
         WHERE docStatus = 1 AND doc_slno = ?`,
       [id],
       (error, results, fields) => {
@@ -613,6 +621,7 @@ module.exports = {
           course = ?,
           category = ?,
           sub_category = ?,
+          nested_category=?,
           group_mast = ?,
           docRack = ?,
           docCustodian = ?,
@@ -639,6 +648,7 @@ module.exports = {
         data.course,
         data.category,
         data.subCategory,
+        data.nested_category,
         data.group,
         data.docRack,
         data.docCustodian,

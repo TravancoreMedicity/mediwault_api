@@ -33,7 +33,7 @@ module.exports = {
     validateToken: (req, res) => {
         // let token = req.headers["authorization"];
         const token = req.cookies.accessToken;
-        console.log(token);
+        // console.log(token);
 
         if (!token) {
             return res.status(401).json({ isValidToken: false, message: "No token provided" });

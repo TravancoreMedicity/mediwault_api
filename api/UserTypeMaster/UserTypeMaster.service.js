@@ -13,7 +13,7 @@ module.exports = {
             ],
             (error, results, fields) => {
                 if (error) {
-                    logger.error(error)
+                    // logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -32,7 +32,7 @@ module.exports = {
             ],
             (error, results, fields) => {
                 if (error) {
-                    logger.error(error)
+                    // logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -44,7 +44,7 @@ module.exports = {
             'SELECT * FROM user_type_master',
             (error, results, fields) => {
                 if (error) {
-                    logger.error(error)
+                    // logger.error(error)
                     return callBack(error)
                 }
                 return callBack(null, results)
@@ -65,7 +65,7 @@ module.exports = {
             ],
             (error, results, fields) => {
                 if (error) {
-                    logger.error(error);
+                    // logger.error(error);
                     return callBack(error);
                 }
                 return callBack(null, results);

@@ -290,8 +290,8 @@ module.exports = {
       { value: state.course, sql: `AND D.course = ${state.course}` },
       { value: state.docNumber, sql: `AND D.doc_id = ${state.docNumber}` },
       { value: state.fileName, sql: `AND D.doc_name LIKE '%${state.fileName}%'` },
-      { value: state.shortName, sql: `AND D.short_name LIKE '%${state.shortName}%'` }
-
+      { value: state.shortName, sql: `AND D.short_name LIKE '%${state.shortName}%'` },
+      { value: state.nestedCategory, sql: `AND D.nested_category = ${state.nestedCategory}` },
 
     ]
 
@@ -320,7 +320,9 @@ module.exports = {
                     D.doc_date,
                     D.doc_ver_date,
                     D.isSecure,
-                    D.short_name
+                    D.short_name,
+                    D.nested_category,
+                    J.nested_cat_name
                 FROM document_master D
                     LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
                     LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -329,6 +331,8 @@ module.exports = {
                     LEFT JOIN doc_category_master A ON A.cat_slno = D.category
                     LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
                     LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+                    LEFT JOIN doc_nested_cat_mast J ON J.nested_cat_slno = D.nested_category
+                    
                 WHERE D.docStatus = 1 ${array === "" ? 'ORDER BY D.doc_slno DESC' : array}`
 
       getSearchData(sql, (err, results) => {

@@ -189,29 +189,29 @@ module.exports = {
                         });
                     }
                     if (results) {
-                        return res.status(200).json({
-                            success: 2,
-                            message: "OTP sent successfully",
-                            otp: otp
-                        });
+                        // return res.status(200).json({
+                        //     success: 2,
+                        //     message: "OTP sent successfully",
+                        //     otp: otp
+                        // });
 
-                        // axios
-                        //     .get(
-                        //         `https://sapteleservices.com/SMS_API/sendsms.php?username=Tmc_medicity&password=c9e780&sendername=TMDCTY&mobile=${mobileNumber}&template_id=1407162012178109509&message=Your+Medicity+App+OTP+code:+${otp}+DuHTEah22dE.Travancore+Medicity+.&routetype=1`
-                        //     )
-                        //     .then((response) => {
-                        //         return res.status(200).json({
-                        //             success: 2,
-                        //             message: "OTP sent successfully",
-                        //         });
-                        //     })
-                        //     .catch((error) => {
-                        //         logger.error(error);
-                        //         return res.status(200).json({
-                        //             success: 3,
-                        //             message: "Error in sending OTP,Please try again",
-                        //         });
-                        //     });
+                        axios
+                            .get(
+                                `https://sapteleservices.com/SMS_API/sendsms.php?username=Tmc_medicity&password=c9e780&sendername=TMDCTY&mobile=${mobileNumber}&template_id=1407162012178109509&message=Your+Medicity+App+OTP+code:+${otp}+DuHTEah22dE.Travancore+Medicity+.&routetype=1`
+                            )
+                            .then((response) => {
+                                return res.status(200).json({
+                                    success: 2,
+                                    message: "OTP sent successfully",
+                                });
+                            })
+                            .catch((error) => {
+                                logger.error(error);
+                                return res.status(200).json({
+                                    success: 3,
+                                    message: "Error in sending OTP,Please try again",
+                                });
+                            });
                     }
                 });
             }
