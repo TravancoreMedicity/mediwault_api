@@ -7,7 +7,8 @@ const {
     updateCusDepartment,
     deleteCusDepartment,
     selectCusDepartmentById,
-    selectCusDepartment
+    selectCusDepartment,
+    selectHrDeptDetails
 } = require('./custDepartment.controller');
 
 
@@ -17,5 +18,5 @@ router.patch('/updateCusDepartment', verifyToken, updateCusDepartment);
 router.delete('/deleteCusDepartment/:id', verifyToken, deleteCusDepartment);
 router.get('/selectCusDepartmentById/:id', verifyToken, selectCusDepartmentById);
 router.get('/selectCusDepartment', verifyToken, selectCusDepartment);
-
+router.get('/selectHrDeptDetails', verifyToken, selectHrDeptDetails);
 module.exports = router

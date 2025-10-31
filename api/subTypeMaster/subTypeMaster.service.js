@@ -4,10 +4,11 @@ const logger = require('../../logger/logger')
 module.exports = {
     insertSubTypeMaster: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_sub_type_master (doc_sub_type_name,doc_sub_type_status) 
-                VALUES (?,?)`,
+            `INSERT INTO doc_sub_type_master (doc_sub_type_name,doc_institute_status,doc_sub_type_status) 
+                VALUES (?,?,?)`,
             [
                 data.sub_type_name,
+                data.doc_institute_status,
                 data.sub_type_status
             ],
             (error, results, fields) => {
@@ -57,6 +58,7 @@ module.exports = {
             `SELECT 
                 sub_type_slno,
                 doc_sub_type_name,
+                doc_institute_status,
                 IF(doc_sub_type_status = 0 , 'Inactive','Active') status
             FROM doc_sub_type_master`,
             (error, results, fields) => {
@@ -83,11 +85,13 @@ module.exports = {
     },
     selectSubTypeMaster: (callBack) => {
         mysqlpool.query(
-            `SELECT 
+            `  SELECT 
                 sub_type_slno,
-                doc_sub_type_name
+                doc_sub_type_name,
+                doc_institute_status
             FROM doc_sub_type_master
             WHERE doc_sub_type_status = 1`,
+
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)

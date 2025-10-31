@@ -14,26 +14,42 @@ module.exports = {
                 password_validity_expiry_date,
                 user_status,
                 sign_in_per_day_limit,
+                sign_in_per_day_count,
                 is_limited_user,
                 login_method_allowed,
                 created_user,
-                last_passwd_change_date
+                last_passwd_change_date,
+                printer_access,
+                custodian_status,
+                notification_status,
+                temp_user_status,
+                temp_user_days,
+                cust_slno
                 )
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
+
                 data.name,
                 data.mobile,
                 data.email,
-                data.login_Type,
+                data.login_type,
                 data.password,
-                data.password_Validity,
+                data.password_validity,
                 data.password_validity_expiry_date,
-                data.user_Status,
-                data.signIn_Limit,
-                data.setOndayLogin,
-                data.loginMethod,
+                data.user_status,
+                data.sign_in_per_day_limit,
+                data.sign_in_per_day_count,
+                data.is_limited_user,
+                data.login_method_allowed,
                 data.created_by,
-                data.lastPasswordChangeDate
+                data.lastPasswordChangeDate,
+                data.printer_access,
+                data.custodian_status,
+                data.notification_status,
+                data.temp_user_status,
+                data.temp_user_days,
+                data.cust_slno
+
             ],
             (error, results, fields) => {
                 logger.error(error)
@@ -43,41 +59,74 @@ module.exports = {
                 return callBack(null, results)
             })
     },
+
+
     editUser: (data, callBack) => {
         mysqlpool.query(
             `UPDATE user 
-                SET name = ?,
-                    mobile = ?,
-                    email = ?,
-                    login_type = ?,
-                    password = ?,
-                    password_validity = ?,
-                    user_status = ?,
-                    last_passwd_change_date = ?,
-                    last_login_date = ?,
-                    login_location = ?
-                WHERE user_slno = ?`,
+            SET 
+                name = ?,
+                mobile = ?,
+                email = ?,
+                login_type = ?,
+                password_validity = ?,
+                user_status = ?,
+                sign_in_per_day_limit = ?,
+                sign_in_per_day_count = ?,
+                is_limited_user = ?,
+                login_method_allowed = ?,
+               
+                printer_access = ?,
+                custodian_status = ?,   
+                notification_status = ?,
+                temp_user_status=?,
+                temp_user_days=?,
+                cust_slno=?,
+                updated_user = ?,
+                updated_time = ?
+            WHERE 
+                user_slno = ?`,
+
+            //                password_validity_expiry_date = ?,
+
+            //  created_user = ?,
+            //     last_passwd_change_date = ?,
             [
                 data.name,
                 data.mobile,
                 data.email,
-                data.login_Type,
-                data.password,
-                data.password_Validity,
-                data.user_Status,
-                data.passDateChange,
-                data.lastLoginDate,
-                data.loginLocation,
-                data.userSlno
+                data.login_type,
+                data.password_validity,
+                // data.password_validity_expiry_date,
+                data.user_status,
+                data.sign_in_per_day_limit,
+                data.sign_in_per_day_count,
+                data.is_limited_user,
+                data.login_method_allowed,
+                // data.created_by,
+                // data.lastPasswordChangeDate,
+                data.printer_access,
+                data.custodian_status,
+                data.notification_status,
+                data.temp_user_status,
+                data.temp_user_days,
+                data.cust_slno,
+                data.edit_user,
+                data.edit_date,
+                data.user_slno
             ],
             (error, results, fields) => {
                 if (error) {
-                    logger.error(error)
-                    return callBack(error)
+                    logger.error(error);
+                    return callBack(error);
                 }
-                return callBack(null, results)
-            })
+                return callBack(null, results);
+            }
+        );
     },
+
+
+
     deleteUser: (id, callBack) => {
         mysqlpool.query(
             `UPDATE user SET user_status = 0 WHERE user_slno = ?`,
@@ -114,6 +163,7 @@ module.exports = {
             })
     },
     mobileExist: (mobile, callBack) => {
+
         mysqlpool.query(
             'SELECT * FROM user WHERE mobile = ?',
             [
@@ -168,7 +218,13 @@ module.exports = {
                 sign_in_per_day_limit,
                 sign_in_per_day_count,
                 is_limited_user,
-                login_method_allowed
+                login_method_allowed,
+                printer_access,
+                custodian_status,
+                notification_status,
+                temp_user_status,
+                temp_user_days,
+                cust_slno
             FROM  user 
             WHERE generatedotp = ?
             AND mobile  = ? 
@@ -266,7 +322,13 @@ module.exports = {
                 sign_in_per_day_limit,
                 sign_in_per_day_count,
                 is_limited_user,
-                login_method_allowed
+                login_method_allowed,
+                printer_access,
+                custodian_status,
+                notification_status,
+                temp_user_status,
+                temp_user_days,
+                cust_slno
             FROM  user 
             WHERE name = ?
             AND user_status = 1`,
@@ -303,4 +365,56 @@ module.exports = {
                 return callBack(null, results)
             })
     },
+
+    getAllSuperUsers: (callBack) => {
+        mysqlpool.query(
+            'SELECT * FROM user WHERE user.login_type=2',
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+    verifyOTPforPrint: (data, callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                user_slno,
+                name,
+                login_type,
+                password_validity,
+                last_passwd_change_date,
+                iv,
+                password_validity_expiry_date,
+                last_login_date,
+                sign_in_per_day_limit,
+                sign_in_per_day_count,
+                is_limited_user,
+                login_method_allowed,
+                printer_access,
+                custodian_status,
+                notification_status,
+                temp_user_status,
+                temp_user_days,
+                cust_slno
+            FROM  user 
+            WHERE generatedotp = ?
+            AND mobile  = ? 
+            AND user_status = 1`,
+            [
+                data.otp,
+                data.mobile
+            ],
+            (error, results, fields) => {
+
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+
 }
+

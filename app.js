@@ -34,7 +34,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://192.168.22.3:3000"],
     credentials: true,
   })
 );
@@ -73,6 +73,12 @@ const { validateToken } = require("./api/tokenValidation/tokenValidation");
 const rackMaster = require("./api/rackMaster/rack.route");
 const custodianDepartment = require("./api/custodianDepartment/custDeparment.route");
 const custodianMaster = require("./api/CustodianMaster/custodian.route");
+const ModuleGroupMaster = require("./api/ModuleGroupMaster/ModuleGroupMaster.route")
+const MenuNameMaster = require("./api/MenuNameMaster/MenuNameMaster.router")
+const UserTypeMaster = require("./api/UserTypeMaster/UserTypeMaster.router");
+const ModuleNameMaster = require("./api/ModuleNameMaster/ModuleNameMaster.router");
+const UserGroupRightMaster = require("./api/UserGroupRightMaster/UserGroupRightMaster.router")
+const docNestedCategoryName = require("./api/documentNestedCategory/documentNestedCategory.router")
 
 app.get("/api/generateOTP/:id", generateOTP); // generate OTP function
 app.get("/api/validateToken", validateToken);
@@ -92,6 +98,12 @@ app.use("/api/locationMaster", locationMaster);
 app.use("/api/rackMaster", rackMaster);
 app.use("/api/custodianDepartment", custodianDepartment);
 app.use("/api/custodianMaster", custodianMaster);
+app.use("/api/ModuleGroupMaster", ModuleGroupMaster)
+app.use("/api/MenuNameMaster", MenuNameMaster)
+app.use("/api/ModuleNameMaster", ModuleNameMaster)
+app.use("/api/UserTypeMaster", UserTypeMaster)
+app.use("/api/UserGroupRightMaster", UserGroupRightMaster)
+app.use("/api/docNestedCategoryName", docNestedCategoryName)
 
 
 // io.on("connection", (socket) => {
@@ -104,7 +116,7 @@ app.use("/api/custodianMaster", custodianMaster);
 io.on("connection", (socket) => {
 
   socket.on("login", (user) => {
-    console.log(user)
+    // console.log(user)
     userId = user.user_slno
     if (activeUsers[userId]) {
       // Disconnect previous client if the user is already logged in
@@ -113,7 +125,7 @@ io.on("connection", (socket) => {
       previousSocket.disconnect();
     }
 
-    console.log(activeUsers)
+    // console.log(activeUsers)
     // Store the current user and socket
     activeUsers[userId] = socket;
 
@@ -122,7 +134,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log('disconnected ----')
-    console.log(activeUsers)
+    // console.log(activeUsers)
     // Remove the user from active users on disconnection
     for (const [userId, userSocket] of Object.entries(activeUsers)) {
       if (userSocket.id === socket.id) {

@@ -2,16 +2,16 @@ const router = require('express').Router();
 const { verifyToken } = require('../tokenValidation/tokenValidation');
 
 const {
-    insertDocSubCategory,
-    editDocSubCategory,
+    insertNestedDocCategory,
+    NestedDocCategory,
     getAllDocSubCategory,
     getSubCategoryList, getSubCategoryById
-} = require('./docSubCategory.controller');
+} = require('./documentNestedCategory.controller');
 
 
-router.post('/insertDocSubCategory', verifyToken, insertDocSubCategory);
-router.patch('/editDocSubCategory', verifyToken, editDocSubCategory);
-router.get('/getAllDocSubCategory', verifyToken, getAllDocSubCategory);
+router.post('/insertNestedDocCategory', verifyToken, insertNestedDocCategory);
+router.patch('/NestedDocCategory', verifyToken, NestedDocCategory);
+router.get('/getAllNestedCategory', verifyToken, getAllDocSubCategory);
 router.get('/getSubCategoryList', verifyToken, getSubCategoryList);
 router.get('/getSubCategoryById/:catSlno', verifyToken, getSubCategoryById);
 

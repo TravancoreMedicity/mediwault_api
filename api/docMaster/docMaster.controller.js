@@ -14,11 +14,16 @@ const {
   getDocTypeCount,
   getDocMasterLikeNameNonSecureOnly,
   getSearchData,
-  updateDocMaster
+  updateDocMaster,
+  updateDocMasterVersion,
+  UpdateActiveStatus, DocDelete, DocApprovals, getNonSecDocMaster, getDocMasterByTypeId, updateDetailTableVals, selectmainCategories
 } = require("./docMaster.service");
 
 const { uploadFile } = require("../multer.config/FileuploadConfig");
 const multer = require("multer");
+const archiver = require('archiver');
+const fs = require("fs")
+const path = require('path');
 
 module.exports = {
   insertDocMaster: (req, res) => {
@@ -122,6 +127,23 @@ module.exports = {
   },
   getDocMaster: (req, res) => {
     getDocMaster((err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+
+  getNonSecDocMaster: (req, res) => {
+    getNonSecDocMaster((err, results) => {
       if (err) {
         logger.error(err);
         return res.status(500).json({
@@ -252,8 +274,11 @@ module.exports = {
       });
     });
   },
+
+
   getSearchData: (req, res) => {
     const state = req.body
+
 
     const ObjToArray = [
       { value: state.docType, sql: `AND D.doc_type = ${state.docType}` },
@@ -264,7 +289,12 @@ module.exports = {
       { value: state.institute, sql: `AND D.institute = ${state.institute}` },
       { value: state.course, sql: `AND D.course = ${state.course}` },
       { value: state.docNumber, sql: `AND D.doc_id = ${state.docNumber}` },
+      { value: state.fileName, sql: `AND D.doc_name LIKE '%${state.fileName}%'` },
+      { value: state.shortName, sql: `AND D.short_name LIKE '%${state.shortName}%'` },
+      { value: state.nestedCategory, sql: `AND D.nested_category = ${state.nestedCategory}` },
+
     ]
+
 
     const array = ObjToArray?.filter(e => e.value !== 0 && e.value !== undefined && e.value !== null)?.map(e => `${e.sql}`).join(" ")
 
@@ -289,7 +319,10 @@ module.exports = {
                     G.group_name,
                     D.doc_date,
                     D.doc_ver_date,
-                    D.isSecure
+                    D.isSecure,
+                    D.short_name,
+                    D.nested_category,
+                    J.nested_cat_name
                 FROM document_master D
                     LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
                     LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -298,9 +331,13 @@ module.exports = {
                     LEFT JOIN doc_category_master A ON A.cat_slno = D.category
                     LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
                     LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+                    LEFT JOIN doc_nested_cat_mast J ON J.nested_cat_slno = D.nested_category
+                    
                 WHERE D.docStatus = 1 ${array === "" ? 'ORDER BY D.doc_slno DESC' : array}`
 
       getSearchData(sql, (err, results) => {
+        // console.log(results);
+
 
         if (err) {
           logger.error(err);
@@ -326,9 +363,178 @@ module.exports = {
     }
 
   },
+
   updateDocMaster: (req, res) => {
     const body = req.body
+    // console.log("body:", body);
+
     updateDocMaster(body, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      else {
+        // updateDetailTableVals(body, (err, results) => {
+        //   console.log(results);
+        //   if (err) {
+        //     logger.error(err);
+        //     return res.status(500).json({
+        //       success: 0,
+        //       message: "Database connection error",
+        //     });
+        //   }
+        //   return res.status(200).json({
+        //     success: 1,
+        //     message: "success",
+        //     data: results,
+        //   });
+        // });
+
+        updateDetailTableVals(body, (err, results) => {
+          if (err) {
+            logger.error(err);
+            return res.status(500).json({
+              success: 0,
+              message: "Database connection error",
+            });
+          }
+          return res.status(200).json({
+            success: 1,
+            message: "success",
+            data: results,
+          });
+        });
+      }
+    });
+  },
+
+  //Renew Document
+  UpdateRenewDocument: (req, res) => {
+    // console.log(JSON.stringify(req.body))
+    uploadFile(req, res, (err) => {
+      //   const body = req.body;
+      //   console.log(req.files);
+      if (err) {
+        // Multer-specific errors
+        if (err instanceof multer.MulterError) {
+          // Multer error File too large. Max size is 10MB.
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(200).json({
+              success: 0,
+              message: "File too large. Max size is 10MB.",
+            });
+          }
+          // Handle other multer errors here as needed
+          return res.status(200).json({ success: 0, message: err.message });
+        }
+
+        // Custom errors from `checkFileType` or other areas
+        if (
+          err === "Error: Only .png, .jpg, .jpeg and .pdf files are allowed!"
+        ) {
+          return res.status(200).json({ success: 0, message: err });
+        }
+
+        // Unknown error
+        return res.status(200).json({
+          success: 0,
+          message: "An unknown error occurred during file upload.",
+        });
+      }
+
+      const body = JSON.parse(JSON.parse(JSON.stringify(req.body))?.postData);
+      // console.log("body", body);
+
+      const fileInformation = (req.files?.length > 0 && req.files) || [];
+      const postUploadFileData = fileInformation?.map((el) => {
+        return {
+          ...el,
+          docID: body.ren_docID,
+          docNumber: body.docNumber,
+          docVersion: body.ren_docVersion,
+          docVersionAment: body.ren_docVersionAment,
+          docVersionInfoEdit: body.ren_docVersionInfoEdit,
+          docCreatedDate: body.ren_docUpload,
+          docCreatedBy: body.ren_userID
+        };
+      });
+      // update document master Table
+      updateDocMasterVersion(body, (err, results) => {
+        // console.log(body);
+
+        if (err) {
+          logger.error(err);
+          return res.status(500).json({
+            success: 0,
+            message: err,
+          });
+        }
+        else {
+          UpdateActiveStatus(body, (err, results) => {
+            if (err) {
+              logger.error(err);
+              return res.status(500).json({
+                success: 0,
+                message: err,
+              });
+            }
+            else {
+
+
+
+              // insertDocMaster(body, (err, results) => {
+              //   console.log("insertDocMaster body", body);
+
+              //   if (err) {
+              //     logger.error(err);
+              //     return res.status(200).json({
+              //       success: 0,
+              //       message: "Database connection error",
+              //     });
+              //   }
+              if (results) {
+                // INSERT DOCUEMTN DETAILS FILE UPLOAD
+                Promise.all(insertDocDetl(postUploadFileData)).then(() => {
+                  inCrementDocSerialNumber((err, results) => logger.error(err)); //increment file upload doc number
+                  return res.status(200).json({
+                    success: 1,
+                    message: "Document Inserted successfully",
+                  });
+                })
+                  .catch((err) => {
+                    logger.error(err);
+                    return res.status(200).json({
+                      success: 0,
+                      message: err,
+                    });
+                  });
+              } else {
+                return res.status(200).json({
+                  success: 0,
+                  message: "Record not Inserted",
+                });
+              }
+              // });
+            }
+          })
+        }
+        // return res.status(200).json({
+        //   success: 1,
+        //   message: "success",
+        //   data: results,
+        // });
+
+      });
+    });
+  },
+
+
+  DocDelete: (req, res) => {
+    const body = req.body
+    DocDelete(body, (err, results) => {
       if (err) {
         logger.error(err);
         return res.status(500).json({
@@ -343,4 +549,299 @@ module.exports = {
       });
     });
   },
+
+
+  ReplaceDocument: (req, res) => {
+    // console.log(JSON.stringify(req.body))
+    uploadFile(req, res, (err) => {
+      //   const body = req.body;
+      // console.log(req.files);
+      if (err) {
+        // Multer-specific errors
+        if (err instanceof multer.MulterError) {
+          // Multer error File too large. Max size is 10MB.
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(200).json({
+              success: 0,
+              message: "File too large. Max size is 10MB.",
+            });
+          }
+          // Handle other multer errors here as needed
+          return res.status(200).json({ success: 0, message: err.message });
+        }
+
+        // Custom errors from `checkFileType` or other areas
+        if (
+          err === "Error: Only .png, .jpg, .jpeg and .pdf files are allowed!"
+        ) {
+          return res.status(200).json({ success: 0, message: err });
+        }
+
+        // Unknown error
+        return res.status(200).json({
+          success: 0,
+          message: "An unknown error occurred during file upload.",
+        });
+      }
+
+      const body = JSON.parse(JSON.parse(JSON.stringify(req.body))?.postData);
+      // console.log("body", body);
+
+      const fileInformation = (req.files?.length > 0 && req.files) || [];
+      const postUploadFileData = fileInformation?.map((el) => {
+        return {
+          ...el,
+          docID: body.ren_docID,
+          docNumber: body.docNumber,
+          docVersion: body.ren_docVersion,
+          docVersionAment: body.ren_docVersionAment,
+          docVersionInfoEdit: body.ren_docVersionInfoEdit,
+          docCreatedDate: body.ren_docUpload,
+          docCreatedBy: body.ren_userID,
+        };
+      });
+      // update document master Table
+      updateDocMasterVersion(body, (err, results) => {
+        // console.log(body);
+
+        if (err) {
+          logger.error(err);
+          return res.status(500).json({
+            success: 0,
+            message: err,
+          });
+        }
+        else {
+          UpdateActiveStatus(body, (err, results) => {
+            if (err) {
+              logger.error(err);
+              return res.status(500).json({
+                success: 0,
+                message: err,
+              });
+            }
+            else {
+
+
+
+              // insertDocMaster(body, (err, results) => {
+              //   console.log("insertDocMaster body", body);
+
+              //   if (err) {
+              //     logger.error(err);
+              //     return res.status(200).json({
+              //       success: 0,
+              //       message: "Database connection error",
+              //     });
+              //   }
+              if (results) {
+                // INSERT DOCUEMTN DETAILS FILE UPLOAD
+                Promise.all(insertDocDetl(postUploadFileData)).then(() => {
+                  inCrementDocSerialNumber((err, results) => logger.error(err)); //increment file upload doc number
+                  return res.status(200).json({
+                    success: 1,
+                    message: "Document Inserted successfully",
+                  });
+                })
+                  .catch((err) => {
+                    logger.error(err);
+                    return res.status(200).json({
+                      success: 0,
+                      message: err,
+                    });
+                  });
+              } else {
+                return res.status(200).json({
+                  success: 0,
+                  message: "Record not Inserted",
+                });
+              }
+              // });
+            }
+          })
+        }
+        // return res.status(200).json({
+        //   success: 1,
+        //   message: "success",
+        //   data: results,
+        // });
+
+      });
+    });
+  },
+  DocApprovals: (req, res) => {
+    const body = req.body
+    DocApprovals(body, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+
+  getDocMasterByTypeId: (req, res) => {
+    const id = req.params.id;
+    getDocMasterByTypeId(id, (err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+
+  //getFiles
+  // getFiles: (req, res) => {
+  //   const id = req.params.docId;
+  //   const fname = req.params.fname
+  //   console.log("fname::", fname);
+
+  //   // const folderPath = path.join('D:/DocMeliora/Meliora/CRF/crf_registration', id);
+  //   const folderPath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+  //   console.log(folderPath, "folderPath");
+
+  //   fs.readdir(folderPath, (err, files) => {
+  //     console.log("err:", err);
+  //     console.log("files:", files);
+
+  //     if (err) {
+  //       console.error(err);
+  //       return res.status(200).json({
+  //         success: 0,
+  //         message: err.message,
+  //       });
+  //     }
+  //     else if (!files || files.length === 0) {
+  //       // No images found
+  //       return res.status(200).json({
+  //         success: 1,
+  //         data: [] // or files if you prefer to return the empty array
+  //       });
+  //     }
+  //     else {
+  //       // Otherwise, create the ZIP archive and pipe it
+  //       res.setHeader('Content-Type', 'application/zip');
+  //       res.setHeader('Content-Disposition', `attachment; filename="${id}_images.zip"`);
+  //       const archive = archiver('zip', { zlib: { level: 9 } });
+  //       archive.on('error', (archiveErr) => {
+  //         console.error('Archive error:', archiveErr);
+  //         res.status(500).json({ success: 0, message: archiveErr.message });
+  //       });
+  //       archive.pipe(res);
+  //       // Optionally, filter for image extensions only
+  //       files.forEach((filename) => {
+  //         const filePath = path.join(folderPath, filename);
+  //         archive.file(filePath, { name: filename });
+  //       });
+  //       archive.finalize();
+  //     }
+  //   });
+  // },
+  getFiles: (req, res) => {
+    const id = req.params.docId;
+    const fname = req.params.fname;
+    // console.log("fname::", fname);
+
+    const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+    // console.log(filePath, "filePath");
+
+    // Check if file exists
+    fs.stat(filePath, (err, stats) => {
+      if (err || !stats.isFile()) {
+        console.error(err);
+        return res.status(200).json({
+          success: 0,
+          message: err ? err.message : 'File not found',
+        });
+      }
+
+      // Set headers to send zip
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${id}_image.zip"`);
+
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      archive.on('error', (archiveErr) => {
+        console.error('Archive error:', archiveErr);
+        res.status(500).json({ success: 0, message: archiveErr.message });
+      });
+
+      archive.pipe(res);
+
+      // Add the single file
+      archive.file(filePath, { name: fname });
+
+      archive.finalize();
+    });
+  },
+  getFilesall: (req, res) => {
+    const id = req.params.docId;
+    // const folderPath = path.join('D:/DocMeliora/Meliora/CRF/crf_registration', id);
+    const folderPath = `F:/DocMeliora/Inteliqo/${id}`;
+    fs.readdir(folderPath, (err, files) => {
+      if (err) {
+        console.error(err);
+        return res.status(200).json({
+          success: 0,
+          message: err.message,
+        });
+      }
+      else if (!files || files.length === 0) {
+        // No images found
+        return res.status(200).json({
+          success: 1,
+          data: [] // or files if you prefer to return the empty array
+        });
+      }
+      else {
+        // Otherwise, create the ZIP archive and pipe it
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${id}_images.zip"`);
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        archive.on('error', (archiveErr) => {
+          console.error('Archive error:', archiveErr);
+          res.status(500).json({ success: 0, message: archiveErr.message });
+        });
+        archive.pipe(res);
+        // Optionally, filter for image extensions only
+        files.forEach((filename) => {
+          const filePath = path.join(folderPath, filename);
+          archive.file(filePath, { name: filename });
+        });
+        archive.finalize();
+      }
+    });
+  },
+
+  selectmainCategories: (req, res) => {
+    selectmainCategories((err, results) => {
+      if (err) {
+        logger.error(err);
+        return res.status(500).json({
+          success: 0,
+          message: "Database connection error",
+        });
+      }
+      return res.status(200).json({
+        success: 1,
+        message: "success",
+        data: results,
+      });
+    });
+  },
+
 };

@@ -15,6 +15,7 @@ module.exports = {
                 course,
                 category,
                 sub_category,
+                nested_category,
                 group_mast,
                 doc_date,
                 doc_ver_date,
@@ -29,9 +30,12 @@ module.exports = {
                 docVer_amentment,
                 dovVer_infoAment,
                 uploadUser,
-                uploadDate
+                uploadDate,
+                short_name,
+                lifelong_validity,
+                days_torenew
             ) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         data.docID,
         data.docNumber,
@@ -43,6 +47,7 @@ module.exports = {
         data.course,
         data.category,
         data.subCategory,
+        data.nestedCategory,
         data.group,
         data.docDate,
         data.docVersionDate,
@@ -57,7 +62,10 @@ module.exports = {
         data.docVersionAment,
         data.docVersionInfoEdit,
         data.userID,
-        data.docUpload
+        data.docUpload,
+        data.shortName,
+        data.lifeLongValidity,
+        data.DaysToRenew
       ],
       (error, results, fields) => {
         if (error) {
@@ -71,8 +79,9 @@ module.exports = {
 
   getDocMaster: (callBack) => {
     mysqlpool.query(
-      `SELECT 
-          D.doc_slno,
+      `SELECT
+            ROW_NUMBER() OVER () as doc_slno,
+         
           D.doc_id,
           D.doc_number,
           CONCAT(D.docVer ,'.', D.docVer_amentment,'.',D.dovVer_infoAment) AS docVer,
@@ -86,7 +95,13 @@ module.exports = {
           M.subcat_name,
           G.group_name,
           D.doc_date,
-          D.doc_ver_date
+          D.doc_ver_date,
+          D.apprvl_status,
+          D.isSecure,
+          D.category,
+          D.doc_sub_type,
+          D.nested_category,
+          J.nested_cat_name
       FROM document_master D
       LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
       LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -95,6 +110,7 @@ module.exports = {
       LEFT JOIN doc_category_master A ON A.cat_slno = D.category
       LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
       LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+      LEFT JOIN doc_nested_cat_mast J ON J.nested_cat_slno = D.nested_category
       WHERE D.docStatus = 1`,
       [],
       (error, results, fields) => {
@@ -106,6 +122,47 @@ module.exports = {
       }
     );
   },
+
+  getNonSecDocMaster: (callBack) => {
+    mysqlpool.query(
+      `SELECT
+            ROW_NUMBER() OVER () as doc_slno,
+          D.doc_id,
+          D.doc_number,
+          CONCAT(D.docVer ,'.', D.docVer_amentment,'.',D.dovVer_infoAment) AS docVer,
+          D.doc_name,
+          D.doc_desc,
+          T.doc_type_master_name,
+          S.doc_sub_type_name,
+          I.institution_name,
+          C.course_name,
+          A.category_name,
+          M.subcat_name,
+          G.group_name,
+          D.doc_date,
+          D.doc_ver_date,
+          D.apprvl_status,
+          D.isSecure
+      FROM document_master D
+      LEFT JOIN doc_type_master T ON T.doc_type_slno = D.doc_type
+      LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+      LEFT JOIN institution_master I ON I.institution_slno = D.institute
+      LEFT JOIN course_master C ON C.course_slno = D.course
+      LEFT JOIN doc_category_master A ON A.cat_slno = D.category
+      LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
+      LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
+      WHERE D.docStatus = 1 and D.isSecure=0`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+
   getDocSecureOnly: (callBack) => {
     mysqlpool.query(
       `SELECT 
@@ -132,8 +189,9 @@ module.exports = {
       LEFT JOIN doc_category_master A ON A.cat_slno = D.category
       LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
       LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
-      WHERE D.docStatus = 1 ORDER BY D.doc_slno DESC LIMIT 20`,
+      WHERE D.docStatus = 1`,
       [],
+      //  WHERE D.docStatus = 1 ORDER BY D.doc_slno DESC LIMIT 20
       (error, results, fields) => {
         if (error) {
           logger.error(error);
@@ -169,7 +227,7 @@ module.exports = {
       LEFT JOIN doc_category_master A ON A.cat_slno = D.category
       LEFT JOIN doc_subcat_master M ON M.subcat_slno = D.sub_category
       LEFT JOIN doc_group_master G ON G.group_slno = D.group_mast
-      WHERE D.docStatus = 1 AND D.isSecure = 0 ORDER BY D.doc_slno DESC LIMIT 20`,
+      WHERE D.docStatus = 1 AND D.isSecure = 0 `,
       [],
       (error, results, fields) => {
         if (error) {
@@ -219,7 +277,18 @@ module.exports = {
             CN.cust_name,-- CUSTODIAN NAME
             D.uploadUser,
             U.name,
-            D.uploadDate
+            D.uploadDate,
+            D.apprvl_status,
+            D.apprvl_user,
+            D.apprvl_date,
+            D.short_name,
+            D.lifelong_validity,
+            D.days_torenew,
+            D.short_name,
+            D.lifelong_validity,
+            D.days_torenew,
+            D.nested_category,
+            J.nested_cat_name
         FROM document_master D
       LEFT JOIN doc_main_type T ON T.main_type_slno = D.doc_type
             LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
@@ -232,6 +301,7 @@ module.exports = {
             LEFT JOIN location_master LM ON LM.loc_slno = R.loc_slno
             LEFT JOIN custodian_master CN ON CN.cust_slno = D.docCustodian
             LEFT JOIN user U ON U.user_slno = D.uploadUser
+            LEFT JOIN doc_nested_cat_mast J ON J.nested_cat_slno = D.nested_category
         WHERE docStatus = 1 AND doc_slno = ?`,
       [id],
       (error, results, fields) => {
@@ -331,6 +401,8 @@ module.exports = {
     );
   },
   inCrementDocSerialNumber: (callBack) => {
+    // console.log("inCrementDocSerialNumber");
+
     mysqlpool.query(
       `UPDATE serial_number SET number = number +1 WHERE type = 1`,
       [],
@@ -343,10 +415,59 @@ module.exports = {
       }
     );
   },
+  // insertDocDetl: (data) =>
+  //   data?.map(
+  //     (item) =>
+  //       new Promise((resolve, reject) => {
+  //         // console.log("insertDocDetl item", item);
+
+  //         mysqlpool.query(
+  // `INSERT INTO document_detl (
+  //     doc_id,
+  //     doc_number,
+  //     originalname,
+  //     mimetype,
+  //     filename,
+  //     docVer,
+  //     docVer_amentment,
+  //     dovVer_infoAment,
+  //     docVerDate,
+  //     docCreatedDate,
+  //     docCreateUser
+  //   ) 
+  //   VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+  // [
+  //   item.docID,
+  //   item.docNumber,
+  //   item.originalname,
+  //   item.mimetype,
+  //   item.filename,
+  //   item.docVersion,
+  //   item.docVersionAment,
+  //   item.docVersionInfoEdit,
+  //   item.docCreatedDate,
+  //   item.docCreatedDate,
+  //   item.docCreatedBy
+  // ],
+  //           (error, results, fields) => {
+  //             if (error) {
+  //               logger.error(error);
+  //               return reject(error);
+  //             }
+  //             return resolve(results);
+  //           }
+  //         );
+  //       })
+  //   ),
+
+
+
   insertDocDetl: (data) =>
     data?.map(
       (item) =>
         new Promise((resolve, reject) => {
+          // console.log("insertDocDetl item", item);
+
           mysqlpool.query(
             `INSERT INTO document_detl (
                 doc_id,
@@ -375,19 +496,58 @@ module.exports = {
               item.docCreatedDate,
               item.docCreatedBy
             ],
-            (error, results, fields) => {
-              if (error) {
-                logger.error(error);
-                return reject(error);
-              }
-              return resolve(results);
+            (error, results) => {
+              if (error) return reject(error);
+
+
+
+              // Now insert into log
+              mysqlpool.query(
+                `INSERT INTO document_detl_log (
+                 doc_id,
+                  doc_number,
+                   originalname,
+                    mimetype,
+                     filename,
+                      docVer,
+                       docVer_amentment,
+                        docVer_infoAment,
+                         docVerDate,
+                          docCreatedDate,
+                           docCreateUser,
+                            
+                                create_user
+              ) 
+              VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+                [
+                  item.docID,
+                  item.docNumber,
+                  item.originalname,
+                  item.mimetype,
+                  item.filename,
+                  item.docVersion,
+                  item.docVersionAment,
+                  item.docVersionInfoEdit,
+                  item.docCreatedDate,
+                  item.docCreatedDate,
+                  item.docCreatedBy,
+                  item.docCreatedBy
+                ], // use the same or copied data
+                (logError, logResults) => {
+                  if (logError) return reject(logError);
+                  return resolve(logResults);
+                }
+              );
             }
           );
         })
     ),
+
+
   getDocDetlinfo: (id, callBack) => {
     mysqlpool.query(
-      `SELECT 
+      `SELECT
+          D.docd_slno,
           D.doc_id,
           D.doc_number,
           D.originalname,
@@ -399,10 +559,11 @@ module.exports = {
           D.docVerDate,
           D.docCreateUser,
           U.name,
-          D.docCreatedDate
+          D.docCreatedDate,
+          D.docActiveStatus
       FROM document_detl D
       LEFT JOIN user U ON U.user_slno = D.docCreateUser
-      WHERE doc_id = ?`,
+      WHERE doc_id = ? ORDER BY D.docActiveStatus ASC ,D.docVer DESC, D.docVer_amentment DESC`,
       [id],
       (error, results, fields) => {
         if (error) {
@@ -416,7 +577,7 @@ module.exports = {
   getDocTypeCount: (callBack) => {
     mysqlpool.query(
       `SELECT 
-          D.doc_type_master_name,
+          D.doc_type_master_name,D.doc_type_slno,
           COUNT(M.doc_slno) COUNT
         FROM doc_type_master D
         LEFT JOIN document_master M ON D.doc_type_slno = M.doc_type AND M.docStatus = 1
@@ -445,7 +606,10 @@ module.exports = {
       }
     );
   },
+
   updateDocMaster: (data, callBack) => {
+    // console.log("data:::::::::::", data);
+
     mysqlpool.query(
       `UPDATE document_master 
         SET 
@@ -457,6 +621,7 @@ module.exports = {
           course = ?,
           category = ?,
           sub_category = ?,
+          nested_category=?,
           group_mast = ?,
           docRack = ?,
           docCustodian = ?,
@@ -468,6 +633,9 @@ module.exports = {
           doc_exp_end = ?,
           isRequiredExp = ?,
           isSecure = ?,
+          short_name=?,
+          lifelong_validity=?,
+          days_torenew=?,
           editUser = ?,
           editDate = ?
         WHERE doc_id = ? `,
@@ -480,6 +648,7 @@ module.exports = {
         data.course,
         data.category,
         data.subCategory,
+        data.nested_category,
         data.group,
         data.docRack,
         data.docCustodian,
@@ -491,9 +660,14 @@ module.exports = {
         data.docExpEnd,
         data.isRequiredExp,
         data.isSecure,
+        data.short_name,
+        data.lifelong_validity,
+        data.days_torenew,
         data.userID,
         data.docEditDate,
         data.docID,
+
+        // docVersionInfoEdit
       ],
       (error, results, fields) => {
         if (error) {
@@ -503,5 +677,226 @@ module.exports = {
         return callBack(null, results);
       }
     );
-  }
+  },
+
+  //update detail master
+
+
+  updateDetailTableVals: (data, callBack) => {
+
+
+    mysqlpool.query(
+      `UPDATE document_detl 
+        SET 
+          dovVer_infoAment=?,
+          docEditDate=?,
+          docEditUser=?,
+          docAmentDate=?,
+          docAmentUser=?
+        WHERE doc_id = ?  `,
+      [
+        data.docVersionInfoEdit,
+        data.docEditDate,
+        data.userID,
+        data.docEditDate,
+        data.userID,
+        data.docID,
+      ],
+      (error, results, fields) => {
+        if (error) {
+
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+
+
+
+  //update renewdoc
+
+  updateDocMasterVersion: (data, callBack) => {
+    mysqlpool.query(
+      `UPDATE document_master 
+        SET 
+          docVer = ?,
+          docVer_amentment = ?,
+          doc_ver_date = ?,
+          doc_exp_start = ?,
+          doc_exp_end = ?,
+          isRequiredExp = ?,
+          editUser = ?,
+          editDate = ?
+        WHERE doc_id = ? `,
+      [
+        data.ren_docVersion,
+        data.ren_docVersionAment,
+        data.ren_doc_ver_date,
+        data.ren_doc_exp_start,
+        data.ren_doc_exp_end,
+        data.ren_isRequiredExp,
+        data.ren_userID,
+        data.ren_docEditDate,
+        data.ren_docID,
+      ],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  UpdateActiveStatus: (data, callBack) => {
+    mysqlpool.query(
+      `UPDATE document_detl 
+        SET 
+          docActiveStatus = 1
+        WHERE docd_slno = ?`,
+      [
+        data.document_slno,
+      ],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  DocDelete: (data, callBack) => {
+    // console.log("DocDelete", data);
+
+    mysqlpool.query(
+      `UPDATE document_detl 
+        SET 
+          docActiveStatus = ?,
+          docEditUser=?,
+          docEditDate=?
+        WHERE docd_slno = ?`,
+      [
+        data.docActiveStatus,
+        data.docCreateUser,
+        data.docEditDate,
+        data.docd_slno
+      ],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+  DocApprovals: (data, callBack) => {
+    mysqlpool.query(
+      `UPDATE document_master 
+        SET 
+         apprvl_status=?,
+         apprvl_user=?,
+         apprvl_date=?
+         WHERE doc_id = ? `,
+      [
+        data.apprvl_status,
+        data.apprvl_user,
+        data.apprvl_date,
+        data.doc_id
+      ],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+
+  getDocMasterByTypeId: (id, callBack) => {
+    mysqlpool.query(
+      `
+SELECT 
+            D.doc_slno,
+            D.doc_id,
+            D.doc_number,
+            D.doc_name,
+            D.doc_desc,
+            D.doc_type, -- DOC TYPE
+            T.main_type_name,
+            D.doc_sub_type, -- DOC-SUB-TYPE
+            S.doc_sub_type_name,
+            D.institute, -- INSTITUTE
+            I.institution_name,
+            D.course, -- COURSE
+            C.course_name,
+            D.category, -- CATEGORY
+            G.category_name,
+            D.sub_category, -- SUB CATEGORY
+            SC.subcat_name,
+            D.group_mast, -- GROUP MASTER 
+            DG.group_name,
+            D.docVer,
+            D.docVer_amentment,
+            D.dovVer_infoAment,
+            D.doc_date, 
+            D.doc_ver_date,
+            D.doc_exp_start,
+            D.doc_exp_end,
+            D.isRequiredExp,
+            D.isSecure,
+            D.docRack, -- RACK NAME
+            R.rac_desc,
+            LM.loc_name,
+            CONCAT(R.rac_alice ,' - ', UPPER(LM.loc_name)) AS rack, -- RACK AND LOCATION NAME
+            D.docCustodian, 
+            CN.cust_name,-- CUSTODIAN NAME
+            D.uploadUser,
+            U.name,
+            D.uploadDate,
+            D.apprvl_status,
+            D.apprvl_user,
+            D.apprvl_date
+        FROM document_master D
+      LEFT JOIN doc_main_type T ON T.main_type_slno = D.doc_type
+            LEFT JOIN doc_sub_type_master S ON S.sub_type_slno = D.doc_sub_type
+            LEFT JOIN institution_master I ON I.institution_slno = D.institute
+            LEFT JOIN course_master C ON C.course_slno = D.course
+            LEFT JOIN doc_category_master G ON G.cat_slno = D.category
+            LEFT JOIN doc_subcat_master SC ON SC.subcat_slno = D.sub_category
+            LEFT JOIN doc_group_master DG ON DG.group_slno = D.group_mast
+            LEFT JOIN rack_master R ON R.rac_slno = D.docRack
+            LEFT JOIN location_master LM ON LM.loc_slno = R.loc_slno
+            LEFT JOIN custodian_master CN ON CN.cust_slno = D.docCustodian
+            LEFT JOIN user U ON U.user_slno = D.uploadUser
+        WHERE docStatus = 1 AND D.doc_type = ?`,
+      [id],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+
+  selectmainCategories: (callBack) => {
+    mysqlpool.query(
+      `SELECT sub_type_slno, doc_sub_type_name, doc_sub_type_status FROM doc_sub_type_master where doc_sub_type_status=1`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          logger.error(error);
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+
 };

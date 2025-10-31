@@ -1,19 +1,19 @@
 const logger = require('../../logger/logger');
 
 const {
-    insertDocSubCategory,
-    editDocSubCategory,
+    insertNestedDocCategory,
+    NestedDocCategory,
     getAllDocSubCategory,
-    subCategoryNameDuplicateCheck,
+    NestedDocCategoryNameDuplicateCheck,
     getSubCategoryList, getSubCategoryById
-} = require('./docSubCategory.service');
+} = require('./documentNestedCategory.service');
 
 module.exports = {
-    insertDocSubCategory: (req, res) => {
+    insertNestedDocCategory: (req, res) => {
         const body = req.body
         const subCategoryname = body?.sub_category_name?.trim()
 
-        subCategoryNameDuplicateCheck(subCategoryname, (err, results) => {
+        NestedDocCategoryNameDuplicateCheck(subCategoryname, (err, results) => {
             if (err) {
                 logger.error(err)
                 return res.status(500).json({
@@ -28,7 +28,7 @@ module.exports = {
                 })
             }
             if (results?.length === 0) {
-                insertDocSubCategory(body, (error, results) => {
+                insertNestedDocCategory(body, (error, results) => {
                     if (error) {
                         logger.error(error)
                         return res.status(500).json({
@@ -47,9 +47,9 @@ module.exports = {
 
     },
 
-    editDocSubCategory: (req, res) => {
+    NestedDocCategory: (req, res) => {
         const body = req.body
-        editDocSubCategory(body, (error, results) => {
+        NestedDocCategory(body, (error, results) => {
             if (error) {
                 logger.error(error)
                 return res.status(500).json({

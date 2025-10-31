@@ -20,7 +20,7 @@ const {
     deleteRefreshToken,
     validateUserCredExcistOrNot,
     userBasedValidationCheck,
-    userBasedInsertRefreshToken
+    userBasedInsertRefreshToken, getAllSuperUsers, verifyOTPforPrint
 } = require("./user.service");
 
 const { addHours, format } = require("date-fns");
@@ -157,7 +157,9 @@ module.exports = {
     },
     generateOTP: async (req, res) => {
         const mobileNumber = req.params.id;
+
         const trimmedNumber = mobileNumber.slice(2);
+
         // First check mobile number registerd or not
         mobileExist(trimmedNumber, (error, results) => {
             if (error) {
@@ -187,28 +189,29 @@ module.exports = {
                         });
                     }
                     if (results) {
-                        return res.status(200).json({
-                            success: 2,
-                            message: "OTP sent successfully",
-                        });
+                        // return res.status(200).json({
+                        //     success: 2,
+                        //     message: "OTP sent successfully",
+                        //     otp: otp
+                        // });
 
-                        // axios
-                        //     .get(
-                        //         `https://sapteleservices.com/SMS_API/sendsms.php?username=Tmc_medicity&password=c9e780&sendername=TMDCTY&mobile=${mobileNumber}&template_id=1407162012178109509&message=Your+Medicity+App+OTP+code:+${otp}+DuHTEah22dE.Travancore+Medicity+.&routetype=1`
-                        //     )
-                        //     .then((response) => {
-                        //         return res.status(200).json({
-                        //             success: 2,
-                        //             message: "OTP sent successfully",
-                        //         });
-                        //     })
-                        //     .catch((error) => {
-                        //         logger.error(error);
-                        //         return res.status(200).json({
-                        //             success: 3,
-                        //             message: "Error in sending OTP,Please try again",
-                        //         });
-                        //     });
+                        axios
+                            .get(
+                                `https://sapteleservices.com/SMS_API/sendsms.php?username=Tmc_medicity&password=c9e780&sendername=TMDCTY&mobile=${mobileNumber}&template_id=1407162012178109509&message=Your+Medicity+App+OTP+code:+${otp}+DuHTEah22dE.Travancore+Medicity+.&routetype=1`
+                            )
+                            .then((response) => {
+                                return res.status(200).json({
+                                    success: 2,
+                                    message: "OTP sent successfully",
+                                });
+                            })
+                            .catch((error) => {
+                                logger.error(error);
+                                return res.status(200).json({
+                                    success: 3,
+                                    message: "Error in sending OTP,Please try again",
+                                });
+                            });
                     }
                 });
             }
@@ -248,6 +251,7 @@ module.exports = {
                     is_limited_user,
                     login_method_allowed,
                     limited_user_validity_end_time,
+                    printer_access
                 } = userData;
 
 
@@ -291,6 +295,7 @@ module.exports = {
                                 name,
                                 accessToken,
                                 login_type,
+                                printer_access
                             };
 
                             res.cookie("accessToken", accessToken, {
@@ -313,9 +318,7 @@ module.exports = {
     },
     getRefershToken: (req, res) => {
         const id = req.params.id;
-        // console.log(id)
         getRefershToken(id, (error, results) => {
-            // console.log(error)
 
             if (error) {
                 logger.error(error);
@@ -344,7 +347,6 @@ module.exports = {
             }
 
             if (results.length > 0) {
-                // console.log(results[0].token)
                 const refreshToken = results[0].token;
 
                 jwt.verify(
@@ -367,9 +369,9 @@ module.exports = {
                             const newAccessToken = jwt.sign({ id: id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" })
                             res.cookie("accessToken", newAccessToken, {
                                 httpOnly: true,
-                                secure: true,
+                                secure: false,
                                 maxAge: process.env.COOKIE_TIME, // 15 min
-                                sameSite: "strict",
+                                sameSite: "lax",
                             });
                             res.json({ message: "revalidated" });
                         }
@@ -430,6 +432,7 @@ module.exports = {
                         is_limited_user,
                         login_method_allowed,
                         limited_user_validity_end_time,
+                        printer_access
                     } = userData;
 
                     const validatingUserLogin = validateUserLoginCheck(
@@ -472,13 +475,16 @@ module.exports = {
                                     name,
                                     accessToken,
                                     login_type,
+                                    printer_access
+
                                 };
 
+
                                 res.cookie("accessToken", accessToken, {
-                                    httpOnly: true,
-                                    secure: true,
-                                    maxAge: process.env.COOKIE_TIME, // 15 min
-                                    sameSite: "strict",
+                                    secure: true,// Set to false for HTTP (localhost). Use true for HTTPS (production).
+                                    maxAge: process.env.COOKIE_TIME,// Optional: sets cookie expiry time in milliseconds  15 min
+                                    sameSite: "Lax", // Helps with CSRF protection; strict is better than lax for security reasons
+                                    // in Production change samsite : "None" and the secure:true for  only https 
                                 });
 
                                 res.json({
@@ -499,4 +505,53 @@ module.exports = {
             }
         });
     },
+
+    getAllSuperUsers: (req, res) => {
+        getAllSuperUsers((error, results) => {
+            if (error) {
+                logger.error(error);
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error",
+                });
+            }
+
+            if (results?.length === 0) {
+                return res.status(200).json({
+                    success: 2,
+                    message: "no data",
+                });
+            }
+
+            return res.status(200).json({
+                success: 1,
+                data: results,
+            });
+        });
+    },
+
+    verifyOTPforPrint: async (req, res) => {
+        const body = req.body;
+        verifyOTPforPrint(body, async (error, results) => {
+            if (error) {
+                logger.error(error);
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error",
+                });
+            }
+            if (results.length === 0) {
+                return res.status(200).json({
+                    success: 1,
+                    message: "Incorrect OTP",
+                });
+            }
+            else {
+                return res.status(200).json({
+                    success: 2,
+                    message: "Entered OTP Matched",
+                });
+            }
+        });
+    }
 };

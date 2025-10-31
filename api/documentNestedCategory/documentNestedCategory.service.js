@@ -2,14 +2,16 @@ const mysqlpool = require('../../config/dbConfig')
 const logger = require('../../logger/logger')
 
 module.exports = {
-    insertDocSubCategory: (data, callBack) => {
+    insertNestedDocCategory: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_subcat_master (subcat_name,cat_slno,subcat_status) VALUES (?,?,?)`,
+            `INSERT INTO doc_nested_cat_mast (nested_cat_name,sub_cat_slno, nested_cat_status) VALUES (?,?,?)`,
+
             [
-                data.doc_sub_type_name,
-                data.category_slno,
-                data.status
+                data.nested_cat_name,
+                data.sub_cat_slno,
+                data.nested_cat_status
             ],
+
             (error, results, fields) => {
                 if (error) {
                     logger.error(error)
@@ -19,49 +21,10 @@ module.exports = {
             }
         )
     },
-    editDocSubCategory: (data, callBack) => {
+
+    NestedDocCategoryNameDuplicateCheck: (data, callBack) => {
         mysqlpool.query(
-            `UPDATE doc_subcat_master 
-                SET subcat_name = ?,
-                    cat_slno = ? ,
-                    subcat_status =? 
-                WHERE subcat_slno = ?`,
-            [
-                data.doc_sub_type_name,
-                data.category_slno,
-                data.status,
-                data.subCatSlno
-            ],
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error)
-                    return callBack(error)
-                }
-                return callBack(null, results)
-            }
-        )
-    },
-    getAllDocSubCategory: (callBack) => {
-        mysqlpool.query(
-            `SELECT 
-                S.subcat_slno,
-                S.subcat_name,
-                C.category_name,
-                IF(S.subcat_status = 1 , 'Active','Inactive') status
-            FROM doc_subcat_master S
-            LEFT JOIN doc_category_master C ON S.cat_slno = C.cat_slno`,
-            (error, results, fields) => {
-                if (error) {
-                    logger.error(error)
-                    return callBack(error)
-                }
-                return callBack(null, results)
-            }
-        )
-    },
-    subCategoryNameDuplicateCheck: (data, callBack) => {
-        mysqlpool.query(
-            `SELECT subcat_slno FROM doc_subcat_master WHERE subcat_name = ?`,
+            `SELECT nested_cat_slno FROM doc_nested_cat_mast WHERE nested_cat_name = ?`,
             [
                 data
             ],
@@ -74,6 +37,54 @@ module.exports = {
             }
         )
     },
+    // SELECT nested_cat_slno, nested_cat_name, sub_cat_slno, nested_cat_status FROM medivault.doc_nested_cat_mast;
+
+    NestedDocCategory: (data, callBack) => {
+        mysqlpool.query(
+            `UPDATE doc_nested_cat_mast 
+                SET nested_cat_name = ?,
+                    sub_cat_slno = ? ,
+                    nested_cat_status =? 
+                WHERE nested_cat_slno = ?`,
+            [
+                data.nested_cat_name,
+                data.sub_cat_slno,
+                data.nested_cat_status,
+                data.nested_cat_slno
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    getAllDocSubCategory: (callBack) => {
+        mysqlpool.query(
+            `  SELECT 
+                S.nested_cat_slno,
+                S.nested_cat_name,
+                C.subcat_name,
+                C.subcat_slno,
+                IF(S.nested_cat_status = 1 , 'Active','Inactive') status
+            FROM doc_nested_cat_mast S
+            LEFT JOIN doc_subcat_master C ON S.sub_cat_slno = C.subcat_slno`,
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+
+
+    // _________________________________________________________________________________________________
+
     getSubCategoryList: (callBack) => {
         mysqlpool.query(
             `SELECT 
