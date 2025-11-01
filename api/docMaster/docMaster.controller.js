@@ -446,7 +446,6 @@ module.exports = {
       }
 
       const body = JSON.parse(JSON.parse(JSON.stringify(req.body))?.postData);
-      // console.log("body", body);
 
       const fileInformation = (req.files?.length > 0 && req.files) || [];
       const postUploadFileData = fileInformation?.map((el) => {
@@ -482,9 +481,6 @@ module.exports = {
               });
             }
             else {
-
-
-
               // insertDocMaster(body, (err, results) => {
               //   console.log("insertDocMaster body", body);
 
@@ -757,6 +753,7 @@ module.exports = {
     const fname = req.params.fname;
     // console.log("fname::", fname);
 
+    // const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
     const filePath = `E:/Documents/${id}/${fname}`;
     // console.log(filePath, "filePath");
 
@@ -785,13 +782,15 @@ module.exports = {
       // Add the single file
       archive.file(filePath, { name: fname });
 
+
       archive.finalize();
     });
   },
   getFilesall: (req, res) => {
     const id = req.params.docId;
     // const folderPath = `F:/DocMeliora/Inteliqo/${id}`; //dummy
-    const folderPath = `'E:/Documents'/${id}`; // live
+    const folderPath = `E:/Documents/${id}`; // live
+    // console.log(folderPath);
 
     fs.readdir(folderPath, (err, files) => {
       if (err) {
@@ -827,6 +826,7 @@ module.exports = {
       }
     });
   },
+
 
   selectmainCategories: (req, res) => {
     selectmainCategories((err, results) => {
