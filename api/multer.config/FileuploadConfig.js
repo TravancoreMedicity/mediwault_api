@@ -5,7 +5,10 @@ const fs = require("fs");
 const logger = require("../../logger/logger");
 
 // Define a base directory where all uploads will be stored
-const baseDirectory = 'F:/DocMeliora/Inteliqo';
+// const baseDirectory = 'F:/DocMeliora/Inteliqo';//dummy
+const baseDirectory = 'E:/Documents'; // live 
+
+
 // const baseDirectory = "/home/administrator/Desktop/myDevFiles/medfileapp/uploads";
 
 const storage = multer.diskStorage({

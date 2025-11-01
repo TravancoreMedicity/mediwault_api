@@ -757,7 +757,7 @@ module.exports = {
     const fname = req.params.fname;
     // console.log("fname::", fname);
 
-    const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+    const filePath = `E:/Documents/${id}/${fname}`;
     // console.log(filePath, "filePath");
 
     // Check if file exists
@@ -776,7 +776,7 @@ module.exports = {
 
       const archive = archiver('zip', { zlib: { level: 9 } });
       archive.on('error', (archiveErr) => {
-        console.error('Archive error:', archiveErr);
+        // console.error('Archive error:', archiveErr);
         res.status(500).json({ success: 0, message: archiveErr.message });
       });
 
@@ -790,8 +790,9 @@ module.exports = {
   },
   getFilesall: (req, res) => {
     const id = req.params.docId;
-    // const folderPath = path.join('D:/DocMeliora/Meliora/CRF/crf_registration', id);
-    const folderPath = `F:/DocMeliora/Inteliqo/${id}`;
+    // const folderPath = `F:/DocMeliora/Inteliqo/${id}`; //dummy
+    const folderPath = `'E:/Documents'/${id}`; // live
+
     fs.readdir(folderPath, (err, files) => {
       if (err) {
         console.error(err);
@@ -813,7 +814,7 @@ module.exports = {
         res.setHeader('Content-Disposition', `attachment; filename="${id}_images.zip"`);
         const archive = archiver('zip', { zlib: { level: 9 } });
         archive.on('error', (archiveErr) => {
-          console.error('Archive error:', archiveErr);
+          // console.error('Archive error:', archiveErr);
           res.status(500).json({ success: 0, message: archiveErr.message });
         });
         archive.pipe(res);

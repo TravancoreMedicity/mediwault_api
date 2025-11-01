@@ -23,7 +23,8 @@ const io = new Server(expressServer, {
   cors: {
     origin: process.env.NODE_ENV === "development" ?
       ["http://localhost:3000", "http://127.0.0.1:3000", "http://192.168.22.170:3000"] :
-      ["http://localhost:3000", "http://127.0.0.1:3000", "http://192.168.22.170:3000"],
+      ["http://localhost:3000", "http://127.0.0.1:3000", "http://192.168.22.170:3000",
+        "http://192.168.10.88:7078"],
     credentials: true,
   },
 });
@@ -34,7 +35,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://192.168.22.3:3000"],
+    origin: ["http://localhost:3000", "http://192.168.22.3:3000", "http://192.168.10.88:7078"],
     credentials: true,
   })
 );
