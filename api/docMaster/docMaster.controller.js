@@ -446,7 +446,6 @@ module.exports = {
       }
 
       const body = JSON.parse(JSON.parse(JSON.stringify(req.body))?.postData);
-      // console.log("body", body);
 
       const fileInformation = (req.files?.length > 0 && req.files) || [];
       const postUploadFileData = fileInformation?.map((el) => {
@@ -482,9 +481,6 @@ module.exports = {
               });
             }
             else {
-
-
-
               // insertDocMaster(body, (err, results) => {
               //   console.log("insertDocMaster body", body);
 
@@ -757,7 +753,8 @@ module.exports = {
     const fname = req.params.fname;
     // console.log("fname::", fname);
 
-    const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+    // const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+    const filePath = `E:/Documents/${id}/${fname}`;
     // console.log(filePath, "filePath");
 
     // Check if file exists
@@ -776,7 +773,7 @@ module.exports = {
 
       const archive = archiver('zip', { zlib: { level: 9 } });
       archive.on('error', (archiveErr) => {
-        console.error('Archive error:', archiveErr);
+        // console.error('Archive error:', archiveErr);
         res.status(500).json({ success: 0, message: archiveErr.message });
       });
 
@@ -785,13 +782,16 @@ module.exports = {
       // Add the single file
       archive.file(filePath, { name: fname });
 
+
       archive.finalize();
     });
   },
   getFilesall: (req, res) => {
     const id = req.params.docId;
-    // const folderPath = path.join('D:/DocMeliora/Meliora/CRF/crf_registration', id);
-    const folderPath = `F:/DocMeliora/Inteliqo/${id}`;
+    // const folderPath = `F:/DocMeliora/Inteliqo/${id}`; //dummy
+    const folderPath = `E:/Documents/${id}`; // live
+    // console.log(folderPath);
+
     fs.readdir(folderPath, (err, files) => {
       if (err) {
         console.error(err);
@@ -813,7 +813,7 @@ module.exports = {
         res.setHeader('Content-Disposition', `attachment; filename="${id}_images.zip"`);
         const archive = archiver('zip', { zlib: { level: 9 } });
         archive.on('error', (archiveErr) => {
-          console.error('Archive error:', archiveErr);
+          // console.error('Archive error:', archiveErr);
           res.status(500).json({ success: 0, message: archiveErr.message });
         });
         archive.pipe(res);
@@ -826,6 +826,7 @@ module.exports = {
       }
     });
   },
+
 
   selectmainCategories: (req, res) => {
     selectmainCategories((err, results) => {
