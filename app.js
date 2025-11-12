@@ -80,6 +80,8 @@ const UserTypeMaster = require("./api/UserTypeMaster/UserTypeMaster.router");
 const ModuleNameMaster = require("./api/ModuleNameMaster/ModuleNameMaster.router");
 const UserGroupRightMaster = require("./api/UserGroupRightMaster/UserGroupRightMaster.router")
 const docNestedCategoryName = require("./api/documentNestedCategory/documentNestedCategory.router")
+const docMasterAuditReports = require("./api/docAuditReports/docMasterAuditReports/docMasterAuditReports.router")
+
 
 app.get("/api/generateOTP/:id", generateOTP); // generate OTP function
 app.get("/api/validateToken", validateToken);
@@ -105,6 +107,8 @@ app.use("/api/ModuleNameMaster", ModuleNameMaster)
 app.use("/api/UserTypeMaster", UserTypeMaster)
 app.use("/api/UserGroupRightMaster", UserGroupRightMaster)
 app.use("/api/docNestedCategoryName", docNestedCategoryName)
+app.use("/api/docMasterAuditReports", docMasterAuditReports)
+
 
 
 // io.on("connection", (socket) => {

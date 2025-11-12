@@ -33,9 +33,15 @@ module.exports = {
                 uploadDate,
                 short_name,
                 lifelong_validity,
-                days_torenew
+                days_torenew,
+                created_ip_address,
+                created_browser_name,
+                created_browser_version,
+                created_os_name,
+                created_os_version
             ) 
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+
       [
         data.docID,
         data.docNumber,
@@ -65,7 +71,12 @@ module.exports = {
         data.docUpload,
         data.shortName,
         data.lifeLongValidity,
-        data.DaysToRenew
+        data.DaysToRenew,
+        data.IPAddress,
+        data.browserName,
+        data.browserVersion,
+        data.osName,
+        data.osVersion
       ],
       (error, results, fields) => {
         if (error) {
@@ -480,9 +491,14 @@ module.exports = {
                 dovVer_infoAment,
                 docVerDate,
                 docCreatedDate,
-                docCreateUser
+                docCreateUser,
+                created_ip_address,
+                created_browser_name,
+                created_browser_version,
+                created_os_name,
+                created_os_version
               ) 
-              VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
               item.docID,
               item.docNumber,
@@ -494,7 +510,12 @@ module.exports = {
               item.docVersionInfoEdit,
               item.docCreatedDate,
               item.docCreatedDate,
-              item.docCreatedBy
+              item.docCreatedBy,
+              item.IPAddress,
+              item.browserName,
+              item.browserVersion,
+              item.osName,
+              item.osVersion
             ],
             (error, results) => {
               if (error) return reject(error);
@@ -637,7 +658,12 @@ module.exports = {
           lifelong_validity=?,
           days_torenew=?,
           editUser = ?,
-          editDate = ?
+          editDate = ?,
+          edited_ip_address=?,
+          edited_browser_name=?,
+          edited_browser_version=?,
+          edited_os_name=?,
+          edited_os_version=?
         WHERE doc_id = ? `,
       [
         data.docName,
@@ -665,6 +691,11 @@ module.exports = {
         data.days_torenew,
         data.userID,
         data.docEditDate,
+        data.IPAddress,
+        data.browserName,
+        data.browserVersion,
+        data.osName,
+        data.osVersion,
         data.docID,
 
         // docVersionInfoEdit
@@ -683,7 +714,7 @@ module.exports = {
 
 
   updateDetailTableVals: (data, callBack) => {
-
+    // console.log("dataaaaaaa:", data);
 
     mysqlpool.query(
       `UPDATE document_detl 
@@ -692,7 +723,12 @@ module.exports = {
           docEditDate=?,
           docEditUser=?,
           docAmentDate=?,
-          docAmentUser=?
+          docAmentUser=?,
+          edited_ip_address=?,
+          edited_browser_name=?,
+          edited_browser_version=?,
+          edited_os_name=?,
+          edited_os_version=?
         WHERE doc_id = ?  `,
       [
         data.docVersionInfoEdit,
@@ -700,6 +736,11 @@ module.exports = {
         data.userID,
         data.docEditDate,
         data.userID,
+        data.IPAddress,
+        data.browserName,
+        data.browserVersion,
+        data.osName,
+        data.osVersion,
         data.docID,
       ],
       (error, results, fields) => {
@@ -751,13 +792,17 @@ module.exports = {
     );
   },
   UpdateActiveStatus: (data, callBack) => {
+    // console.log(" data", data);
+
+    // console.log(" data.document_slno", data[0].document_slno);
+
     mysqlpool.query(
       `UPDATE document_detl 
         SET 
           docActiveStatus = 1
         WHERE docd_slno = ?`,
       [
-        data.document_slno,
+        data[0].document_slno,
       ],
       (error, results, fields) => {
         if (error) {
@@ -768,6 +813,68 @@ module.exports = {
       }
     );
   },
+
+  // UpdateActiveStatus: (data, callBack) => {
+  //   console.log("data:", data);
+
+  //   mysqlpool.query(
+  //     `UPDATE document_detl 
+  //     SET docActiveStatus = 1
+  //     WHERE docd_slno = ?`,
+  //     [data.document_slno],
+  //     (error, results) => {
+  //       if (error) {
+  //         logger.error(error);
+  //         return callBack(error);
+  //       }
+
+  //       // If update affected rows, proceed with insert
+  //       if (results.affectedRows > 0) {
+  //         const insertQuery = `
+  //         INSERT INTO document_detail_replace_audit_log (
+  //           document_no, 
+  //           document_id, 
+  //           prev_event, 
+  //           new_event, 
+  //           replaced_ip_address, 
+  //           replaced_browser_name,
+  //           replaced_os_name, 
+  //           replaced_os_version, 
+  //           replaced_browser_version
+  //         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  //       `;
+
+  //         mysqlpool.query(
+  //           insertQuery,
+  //           [
+  //             data.document_no,
+  //             data.docID,
+  //             data.prev_event,
+  //             data.new_event,
+  //             data.IPAddress,
+  //             data.browserName,
+  //             data.browserVersion,
+  //             data.osName,
+  //             data.osVersion,
+  //           ],
+  //           (insertError, insertResults) => {
+  //             if (insertError) {
+  //               logger.error(insertError);
+  //               return callBack(insertError);
+  //             }
+
+  //             return callBack(null, results);
+  //           }
+  //         );
+  //       } else {
+  //         // No record found to update
+  //         return callBack(null, results);
+  //       }
+  //     }
+  //   );
+  // },
+
+
   DocDelete: (data, callBack) => {
     // console.log("DocDelete", data);
 
@@ -776,12 +883,22 @@ module.exports = {
         SET 
           docActiveStatus = ?,
           docEditUser=?,
-          docEditDate=?
+          docEditDate=?,
+          edited_ip_address=?,
+          edited_browser_name=?,
+          edited_browser_version=?,
+          edited_os_name=?,
+          edited_os_version=?
         WHERE docd_slno = ?`,
       [
         data.docActiveStatus,
         data.docCreateUser,
         data.docEditDate,
+        data.IPAddress,
+        data.browserName,
+        data.browserVersion,
+        data.osName,
+        data.osVersion,
         data.docd_slno
       ],
       (error, results, fields) => {
