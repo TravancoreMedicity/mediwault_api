@@ -4,11 +4,17 @@ const logger = require('../../logger/logger')
 module.exports = {
     insertDocSubCategory: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_subcat_master (subcat_name,cat_slno,subcat_status) VALUES (?,?,?)`,
+            `INSERT INTO doc_subcat_master (subcat_name, cat_slno, subcat_status, create_user, create_ip, create_browser_name, create_browser_version, create_os_name, create_os_version) VALUES (?,?,?,?,?,?,?,?,?)`,
             [
                 data.doc_sub_type_name,
                 data.category_slno,
-                data.status
+                data.status,
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion
             ],
             (error, results, fields) => {
                 if (error) {
@@ -24,13 +30,25 @@ module.exports = {
             `UPDATE doc_subcat_master 
                 SET subcat_name = ?,
                     cat_slno = ? ,
-                    subcat_status =? 
+                    subcat_status =? ,
+                    edit_user=?,
+                    edit_ip=?,
+                    edit_browser_name=?,
+                    edit_browser_version=?,
+                    edit_os_name=?,
+                    edit_os_version=?
                 WHERE subcat_slno = ?`,
             [
                 data.doc_sub_type_name,
                 data.category_slno,
                 data.status,
-                data.subCatSlno
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion,
+                data.sub_cat_slno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -47,6 +65,8 @@ module.exports = {
                 S.subcat_slno,
                 S.subcat_name,
                 C.category_name,
+                S.subcat_status,
+                S.cat_slno,
                 IF(S.subcat_status = 1 , 'Active','Inactive') status
             FROM doc_subcat_master S
             LEFT JOIN doc_category_master C ON S.cat_slno = C.cat_slno`,

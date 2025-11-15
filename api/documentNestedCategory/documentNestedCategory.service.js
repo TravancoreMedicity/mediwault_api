@@ -4,12 +4,18 @@ const logger = require('../../logger/logger')
 module.exports = {
     insertNestedDocCategory: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_nested_cat_mast (nested_cat_name,sub_cat_slno, nested_cat_status) VALUES (?,?,?)`,
-
+            `INSERT INTO doc_nested_cat_mast (nested_cat_name, sub_cat_slno, nested_cat_status, create_user, create_ip,
+             create_browser_name, create_browser_version, create_os_name, create_os_version) VALUES (?,?,?,?,?,?,?,?,?)`,
             [
                 data.nested_cat_name,
                 data.sub_cat_slno,
-                data.nested_cat_status
+                data.nested_cat_status,
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion
             ],
 
             (error, results, fields) => {
@@ -37,20 +43,31 @@ module.exports = {
             }
         )
     },
-    // SELECT nested_cat_slno, nested_cat_name, sub_cat_slno, nested_cat_status FROM medivault.doc_nested_cat_mast;
 
     NestedDocCategory: (data, callBack) => {
         mysqlpool.query(
             `UPDATE doc_nested_cat_mast 
                 SET nested_cat_name = ?,
-                    sub_cat_slno = ? ,
-                    nested_cat_status =? 
+                    sub_cat_slno = ?,
+                    nested_cat_status =?,
+                    edit_user=?,
+                    edit_ip=?,
+                    edit_browser_name=?,
+                    edit_browser_version=?,
+                    edit_os_name=?,
+                    edit_os_version=?
                 WHERE nested_cat_slno = ?`,
             [
                 data.nested_cat_name,
                 data.sub_cat_slno,
                 data.nested_cat_status,
-                data.nested_cat_slno
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion,
+                data.nestedCat_slno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -68,6 +85,7 @@ module.exports = {
                 S.nested_cat_name,
                 C.subcat_name,
                 C.subcat_slno,
+                S.nested_cat_status,
                 IF(S.nested_cat_status = 1 , 'Active','Inactive') status
             FROM doc_nested_cat_mast S
             LEFT JOIN doc_subcat_master C ON S.sub_cat_slno = C.subcat_slno`,
@@ -81,9 +99,6 @@ module.exports = {
         )
     },
 
-
-
-    // _________________________________________________________________________________________________
 
     getSubCategoryList: (callBack) => {
         mysqlpool.query(

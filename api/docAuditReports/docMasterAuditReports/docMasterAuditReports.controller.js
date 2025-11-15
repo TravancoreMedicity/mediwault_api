@@ -1,6 +1,7 @@
 const {
     getdocMasterCreateAuditReports, getdocMasterEditAuditReports, getdocDetailCreateAuditReports, getdocDetailEditAuditReports,
-    getUserCreateAuditReports, getUserEditAuditReports, getDocTypeCreateAuditReports, getDocTypeEditAuditReports
+    getUserCreateAuditReports, getUserEditAuditReports, getDocTypeCreateAuditReports, getDocTypeEditAuditReports, getSubTypeCreateAuditReports, getSubTypeEditAuditReports, getDocCatCreateAuditReports, getDocCatEditAuditReports, getDocSubCategoryAuditReports, getDocSubCategoryEditAuditReports, getDocNestedCatCreateAuditReports, getDocNestedCatEditAuditReports, getDocGroupCreateAuditReports, getDocGroupEditAuditReports
+
 } = require('./docMasterAuditReports.service');
 
 module.exports = {
@@ -145,10 +146,184 @@ module.exports = {
                 });
             }
         })
+    },
+    getSubTypeCreateAuditReports: (req, res) => {
+        getSubTypeCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    getSubTypeEditAuditReports: (req, res) => {
+        getSubTypeEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    getDocCatCreateAuditReports: (req, res) => {
+        getDocCatCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    getDocCatEditAuditReports: (req, res) => {
+        getDocCatEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    getDocSubCategoryAuditReports: (req, res) => {
+        getDocSubCategoryAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    getDocSubCategoryEditAuditReports: (req, res) => {
+        getDocSubCategoryEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    ////////
+    getDocNestedCatCreateAuditReports: (req, res) => {
+        getDocNestedCatCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    getDocNestedCatEditAuditReports: (req, res) => {
+        getDocNestedCatEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    getDocGroupCreateAuditReports: (req, res) => {
+        getDocGroupCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    getDocGroupEditAuditReports: (req, res) => {
+        getDocGroupEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
     }
 }
-
-
-
 
 

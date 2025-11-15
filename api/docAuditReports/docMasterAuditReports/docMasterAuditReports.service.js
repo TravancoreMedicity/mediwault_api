@@ -135,6 +135,176 @@ module.exports = {
         )
     },
 
+    getSubTypeCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+              SELECT log_slno, sub_type_slno, doc_sub_type_name, doc_sub_type_status, doc_institute_status, create_user, create_date, create_ip,
+              create_browser_name, create_browser_version, create_os_name, create_os_version,user.name as username,
+              IF(doc_subtype_create_audit_log.doc_sub_type_status = 1,'Active','Inactive' ) docsubtype_status,
+              IF(doc_subtype_create_audit_log.doc_institute_status = 1,'Yes','No' ) docinstitute_status
+              FROM doc_subtype_create_audit_log
+              LEFT JOIN user ON user.user_slno =doc_subtype_create_audit_log.create_user
+            `,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    getSubTypeEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            `SELECT log_slno, sub_type_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name,
+             edit_browser_version, edit_os_name, edit_os_version,user.name as username
+             FROM doc_subtype_edit_audit_log
+             LEFT JOIN user ON user.user_slno =doc_subtype_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+
+    //document category audit report
+
+    getDocCatCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+             SELECT log_slno, cat_slno, category_name, cat_status, create_user, create_date, create_ip, create_browser_name,
+             create_browser_version, create_os_name, create_os_version ,user.name as username,
+             IF(doc_category_created_audit_log.cat_status = 1,'Active','Inactive' ) category_status
+             FROM doc_category_created_audit_log
+             LEFT JOIN user ON user.user_slno =doc_category_created_audit_log.create_user
+            `,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    getDocCatEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            `SELECT log_slno, cat_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name, edit_browser_version, 
+             edit_os_name, edit_os_version ,user.name as username
+             FROM doc_category_edited_audit_log
+             LEFT JOIN user ON user.user_slno =doc_category_edited_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    //document sub category
+    getDocSubCategoryAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+             SELECT log_slno, subcat_slno, subcat_name, doc_subcat_create_audit_log.cat_slno, subcat_status, doc_subcat_create_audit_log.create_user, 
+             doc_subcat_create_audit_log.create_date, doc_subcat_create_audit_log.create_ip,
+             doc_subcat_create_audit_log.create_browser_name, doc_subcat_create_audit_log.create_browser_version,
+             doc_subcat_create_audit_log.create_os_name, doc_subcat_create_audit_log.create_os_version,user.name as username,
+             IF(doc_subcat_create_audit_log.subcat_status = 1,'Active','Inactive' ) sub_category_status,category_name
+             FROM doc_subcat_create_audit_log
+			 LEFT JOIN user ON user.user_slno =doc_subcat_create_audit_log.create_user
+             LEFT JOIN doc_category_master ON doc_category_master.cat_slno=doc_subcat_create_audit_log.cat_slno
+            `,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    getDocSubCategoryEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            `SELECT log_slno, subcat_slno, prev_event, new_event, edit_user, edit_date, edit_ip,edit_browser_name, edit_browser_version, edit_os_name, edit_os_version,user.name as username
+             FROM doc_subcat_edit_audit_log
+             LEFT JOIN user ON user.user_slno =doc_subcat_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+    getDocNestedCatCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+              SELECT log_slno, nested_cat_slno, nested_cat_name, sub_cat_slno, nested_cat_status, doc_nestedcat_create_audit_log.create_user, 
+              doc_nestedcat_create_audit_log.create_date, doc_nestedcat_create_audit_log.create_ip,
+              doc_nestedcat_create_audit_log.create_browser_name, doc_nestedcat_create_audit_log.create_browser_version, doc_nestedcat_create_audit_log.create_os_name,
+              doc_nestedcat_create_audit_log.create_os_version,user.name as username,doc_subcat_master.subcat_name,
+              IF(doc_nestedcat_create_audit_log.nested_cat_status = 1,'Active','Inactive' ) nested_catstatus
+              FROM doc_nestedcat_create_audit_log
+              LEFT JOIN user ON user.user_slno=doc_nestedcat_create_audit_log.create_user
+              LEFT JOIN doc_subcat_master ON doc_subcat_master.subcat_slno=doc_nestedcat_create_audit_log.sub_cat_slno
+            `,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getDocNestedCatEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` SELECT log_slno, nested_cat_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name,
+             edit_browser_version, edit_os_name, edit_os_version,user.name as username
+             FROM doc_nestedcat_edit_audit_log
+             LEFT JOIN user ON user.user_slno =doc_nestedcat_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getDocGroupCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+               SELECT log_slno, group_slno, group_name, group_status, create_user, create_date, create_ip, create_browser_name, 
+              create_browser_version, create_os_name, create_os_version,user.name as username,
+              IF(doc_group_create_audit_log.group_status = 1,'Active','Inactive' ) groupstatus
+              FROM doc_group_create_audit_log
+              LEFT JOIN user ON user.user_slno=doc_group_create_audit_log.create_user
+            `,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getDocGroupEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+             SELECT log_slno, group_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_version, edit_browser_name, edit_os_name, edit_os_version,user.name as username
+             FROM doc_group_edit_audit_log
+             LEFT JOIN user ON user.user_slno =doc_group_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
 }
 
 

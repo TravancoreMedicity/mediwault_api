@@ -40,7 +40,9 @@ module.exports = {
 
                     return res.status(200).json({
                         success: 1,
-                        data: results
+                        data: results,
+                        message: "Data Inserted Successfully"
+
                     });
                 });
             }
@@ -64,13 +66,15 @@ module.exports = {
             }
             return res.status(200).json({
                 success: 1,
-                data: results
+                data: results,
             });
         });
     },
     editDocCategory: (req, res) => {
         const body = req.body;
         editDocCategory(body, (error, results) => {
+            console.log(results);
+
             if (error) {
                 logger.error(error);
                 return res.status(500).json({
@@ -86,7 +90,9 @@ module.exports = {
             }
             return res.status(200).json({
                 success: 1,
-                data: results
+                data: results,
+                message: "Data Updated Successfully"
+
             });
         });
     },
