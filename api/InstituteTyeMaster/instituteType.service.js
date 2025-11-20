@@ -4,10 +4,17 @@ const logger = require('../../logger/logger')
 module.exports = {
     insertInstituteType: (data, callBack) => {
         mysqlpool.query(
-            `INSERT institution_type_master (institute_type_name,institute_type_status) VALUES (?,?)`,
+
+            `INSERT institution_type_master (institute_type_name, institute_type_status, create_user, create_ip, create_browser_name, create_browser_version, create_os_name,create_os_version) VALUES (?,?,?,?,?,?,?,?)`,
             [
                 data.institute_type_name,
-                data.institute_type_status
+                data.institute_type_status,
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion
             ],
             (error, results, fields) => {
                 if (error) {
@@ -19,12 +26,29 @@ module.exports = {
         )
     },
     editInstituteTypeMaster: (data, callBack) => {
+
         mysqlpool.query(
-            `UPDATE institution_type_master SET institute_type_name = ?, institute_type_status = ? WHERE institute_type_slno = ? `,
+
+            `UPDATE institution_type_master SET 
+             institute_type_name = ?,
+             institute_type_status = ?,
+             edit_user=?,
+             edit_ip=?,
+             edit_browser_name=?,
+             edit_browser_version=?,
+             edit_os_name=?,
+             edit_os_version=?
+             WHERE institute_type_slno = ? `,
             [
-                data.institute_type_name,
-                data.institute_type_status,
-                data.institute_type_slno
+                data.institutionTypeName,
+                data.institutionTypeStatus,
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion,
+                data.institutionTypeSlno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -40,6 +64,7 @@ module.exports = {
             `SELECT 
                 institute_type_slno,
                 institute_type_name,
+                institute_type_status,
                 IF(institute_type_status = 1 ,'Active','Inactive') status
             FROM institution_type_master`,
             (error, results, fields) => {

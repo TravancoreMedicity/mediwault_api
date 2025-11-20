@@ -10,7 +10,7 @@ const {
 
 
 router.post('/insertNestedDocCategory', verifyToken, insertNestedDocCategory);
-router.patch('/NestedDocCategory', verifyToken, NestedDocCategory);
+router.patch('/editNestedCategoryName', verifyToken, NestedDocCategory);
 router.get('/getAllNestedCategory', verifyToken, getAllDocSubCategory);
 router.get('/getSubCategoryList', verifyToken, getSubCategoryList);
 router.get('/getSubCategoryById/:catSlno', verifyToken, getSubCategoryById);

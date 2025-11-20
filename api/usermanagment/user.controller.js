@@ -2,6 +2,8 @@
 require("dotenv").config();
 const { default: axios } = require("axios");
 const jwt = require("jsonwebtoken");
+const UAParser = require('ua-parser-js');
+
 
 const { genSaltSync, hashSync, compareSync } = require("bcrypt");
 
@@ -20,7 +22,7 @@ const {
     deleteRefreshToken,
     validateUserCredExcistOrNot,
     userBasedValidationCheck,
-    userBasedInsertRefreshToken, getAllSuperUsers, verifyOTPforPrint
+    userBasedInsertRefreshToken, getAllSuperUsers, verifyOTPforPrint, insertLoginActivity
 } = require("./user.service");
 
 const { addHours, format } = require("date-fns");
@@ -195,7 +197,6 @@ module.exports = {
                         //     otp: otp
                         // });
 
-
                         axios
                             .get(
                                 `https://sapteleservices.com/SMS_API/sendsms.php?username=Tmc_medicity&password=c9e780&sendername=TMDCTY&mobile=${mobileNumber}&template_id=1407162012178109509&message=Your+Medicity+App+OTP+code:+${otp}+DuHTEah22dE.Travancore+Medicity+.&routetype=1`
@@ -218,6 +219,8 @@ module.exports = {
             }
         });
     },
+
+
     verifyOTPandLogin: async (req, res) => {
         const body = req.body;
 
@@ -280,6 +283,27 @@ module.exports = {
                     const accessToken = generateAccessToken(userData);
                     const refreshToken = generateRefreshToken(user_slno);
 
+                    //to get the IP Address
+                    const clientIP =
+                        req.headers["x-forwarded-for"]?.split(",").shift() ||
+                        req.socket?.remoteAddress ||
+                        req.connection?.remoteAddress;
+
+                    // Optional: clean up IPv6 localhost format "::ffff:192.168.1.10"
+                    const IPAddress = clientIP?.replace("::ffff:", "") || "unknown";
+
+                    const userAgent = req.headers['user-agent'] || 'Unknown';
+
+                    // for getting browser details
+                    const parser = new UAParser(userAgent);
+                    const result = parser.getResult();
+
+                    const browserName = result.browser.name || 'Unknown';
+                    const browserVersion = result.browser.version || 'Unknown';
+                    const osName = result.os.name || 'Unknown';
+                    const osVersion = result.os.version || 'Unknown';
+
+
                     // insert the refresh token
                     insertRefreshToken({ user_slno, refresh_token: refreshToken }, (error, results) => {
                         if (error) {
@@ -291,25 +315,42 @@ module.exports = {
                         }
 
                         if (results) {
-                            const returnData = {
-                                user_slno,
-                                name,
-                                accessToken,
-                                login_type,
-                                printer_access
-                            };
+                            // Call the next log table insert function here
+                            insertLoginActivity({ user_slno, IPAddress, browserName, browserVersion, osName, osVersion }, (err, loginResult) => {
+                                if (err) {
+                                    logger.error(err);
+                                    return res.status(500).json({
+                                        success: 0,
+                                        message: "Error inserting login activity",
+                                    });
+                                }
 
-                            res.cookie("accessToken", accessToken, {
-                                httpOnly: true,
-                                secure: true,
-                                maxAge: process.env.COOKIE_TIME, // 15 min
-                                sameSite: "strict",
-                            });
+                                // Continue response only after both inserts are successful
+                                const returnData = {
+                                    user_slno,
+                                    name,
+                                    accessToken,
+                                    login_type,
+                                    printer_access,
+                                    IPAddress,
+                                    browserName,
+                                    browserVersion,
+                                    osName,
+                                    osVersion
+                                };
 
-                            res.json({
-                                success: 2,
-                                userInfo: JSON.stringify(returnData),
-                                message: "OTP verified successfully",
+                                res.cookie("accessToken", accessToken, {
+                                    httpOnly: true,
+                                    secure: true,
+                                    maxAge: process.env.COOKIE_TIME,
+                                    sameSite: "strict",
+                                });
+
+                                res.json({
+                                    success: 2,
+                                    userInfo: JSON.stringify(returnData),
+                                    message: "OTP verified successfully",
+                                });
                             });
                         }
                     });
@@ -317,6 +358,9 @@ module.exports = {
             }
         });
     },
+
+
+
     getRefershToken: (req, res) => {
         const id = req.params.id;
         getRefershToken(id, (error, results) => {

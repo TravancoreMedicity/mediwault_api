@@ -38,7 +38,8 @@ module.exports = {
                     }
                     return res.status(200).json({
                         success: 1,
-                        data: results
+                        data: results,
+                        message: "Data Inserted Successfully"
                     })
                 })
             }
@@ -61,7 +62,7 @@ module.exports = {
             }
             return res.status(200).json({
                 success: 1,
-                message: 'success',
+                message: "Data Updated Successfully",
                 data: results
             })
         })

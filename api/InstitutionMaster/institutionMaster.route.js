@@ -15,3 +15,5 @@ router.get('/getAllInstitutionMaster', verifyToken, getAllInstitutionMaster);
 router.get('/selectInstituteMaster', verifyToken, selectInstituteMaster);
 
 module.exports = router
+
+

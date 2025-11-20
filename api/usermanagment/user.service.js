@@ -24,9 +24,11 @@ module.exports = {
                 notification_status,
                 temp_user_status,
                 temp_user_days,
-                cust_slno
+                cust_slno,
+                created_ip, created_browser_name, created_browser_version, created_os_name, created_os_version
+
                 )
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
             [
 
                 data.name,
@@ -48,7 +50,13 @@ module.exports = {
                 data.notification_status,
                 data.temp_user_status,
                 data.temp_user_days,
-                data.cust_slno
+                data.cust_slno,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion
+
 
             ],
             (error, results, fields) => {
@@ -75,7 +83,7 @@ module.exports = {
                 sign_in_per_day_count = ?,
                 is_limited_user = ?,
                 login_method_allowed = ?,
-               
+            
                 printer_access = ?,
                 custodian_status = ?,   
                 notification_status = ?,
@@ -83,7 +91,12 @@ module.exports = {
                 temp_user_days=?,
                 cust_slno=?,
                 updated_user = ?,
-                updated_time = ?
+                updated_time = ?,
+                edited_ip= ?,
+                 edited_browser_name= ?,
+                 edited_browser_version= ?,
+                 edited_os_name= ?,
+                  edited_os_version= ?
             WHERE 
                 user_slno = ?`,
 
@@ -113,10 +126,17 @@ module.exports = {
                 data.cust_slno,
                 data.edit_user,
                 data.edit_date,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion,
                 data.user_slno
             ],
             (error, results, fields) => {
                 if (error) {
+                    console.log("error:", error);
+
                     logger.error(error);
                     return callBack(error);
                 }
@@ -260,6 +280,35 @@ module.exports = {
                 return callBack(null, results)
             })
     },
+
+    insertLoginActivity: (data, callBack) => {
+        mysqlpool.query(
+            `INSERT INTO user_login_history(
+               log_user_slno,
+               log_ip_address,
+               log_browser_name,
+               log_browser_version,
+               log_os_name,
+               log_os_version
+                )
+                VALUES(?,?,?,?,?,?)`,
+            [
+                data.user_slno,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion
+            ],
+            (error, results, fields) => {
+                logger.error(error)
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            })
+    },
+
     getRefershToken: async (id, callBack) => {
         mysqlpool.query(
             `SELECT token,sessionid FROM user WHERE user_slno = ?`,

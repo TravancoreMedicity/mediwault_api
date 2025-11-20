@@ -59,9 +59,32 @@ module.exports = {
         });
       }
 
+      // //to get the IP Address
+      // const clientIP =
+      //   req.headers["x-forwarded-for"]?.split(",").shift() ||
+      //   req.socket?.remoteAddress ||
+      //   req.connection?.remoteAddress;
+
+      // // Optional: clean up IPv6 localhost format "::ffff:192.168.1.10"
+      // const IPAddress = clientIP?.replace("::ffff:", "") || "unknown";
+
+      // const userAgent = req.headers['user-agent'] || 'Unknown';
+
+      // // for getting browser details
+      // const parser = new UAParser(userAgent);
+      // const result = parser.getResult();
+
+      // const browserName = result.browser.name || 'Unknown';
+      // const browserVersion = result.browser.version || 'Unknown';
+      // const osName = result.os.name || 'Unknown';
+      // const osVersion = result.os.version || 'Unknown';
+
+
       const body = JSON.parse(JSON.parse(JSON.stringify(req.body))?.postData);
+
       const fileInformation = (req.files?.length > 0 && req.files) || [];
       const postUploadFileData = fileInformation?.map((el) => {
+
         return {
           ...el,
           docID: body.docID,
@@ -70,7 +93,12 @@ module.exports = {
           docVersionAment: body.docVersionAment,
           docVersionInfoEdit: body.docVersionInfoEdit,
           docCreatedDate: body.docUpload,
-          docCreatedBy: body.userID
+          docCreatedBy: body.userID,
+          IPAddress: body.IPAddress,
+          browserName: body.browserName,
+          browserVersion: body.browserVersion,
+          osName: body.osName,
+          osVersion: body.osVersion
         };
       });
 
@@ -370,6 +398,8 @@ module.exports = {
 
     updateDocMaster(body, (err, results) => {
       if (err) {
+        // console.log("LOGGG", err);
+
         logger.error(err);
         return res.status(500).json({
           success: 0,
@@ -377,21 +407,6 @@ module.exports = {
         });
       }
       else {
-        // updateDetailTableVals(body, (err, results) => {
-        //   console.log(results);
-        //   if (err) {
-        //     logger.error(err);
-        //     return res.status(500).json({
-        //       success: 0,
-        //       message: "Database connection error",
-        //     });
-        //   }
-        //   return res.status(200).json({
-        //     success: 1,
-        //     message: "success",
-        //     data: results,
-        //   });
-        // });
 
         updateDetailTableVals(body, (err, results) => {
           if (err) {
@@ -457,7 +472,12 @@ module.exports = {
           docVersionAment: body.ren_docVersionAment,
           docVersionInfoEdit: body.ren_docVersionInfoEdit,
           docCreatedDate: body.ren_docUpload,
-          docCreatedBy: body.ren_userID
+          docCreatedBy: body.ren_userID,
+          IPAddress: body.IPAddress,
+          browserName: body.browserName,
+          browserVersion: body.browserVersion,
+          osName: body.osName,
+          osVersion: body.osVersion
         };
       });
       // update document master Table
@@ -594,11 +614,21 @@ module.exports = {
           docVersionInfoEdit: body.ren_docVersionInfoEdit,
           docCreatedDate: body.ren_docUpload,
           docCreatedBy: body.ren_userID,
+          IPAddress: body.IPAddress,
+          browserName: body.browserName,
+          browserVersion: body.browserVersion,
+          osName: body.osName,
+          osVersion: body.osVersion,
+          document_slno: body.document_slno
         };
       });
       // update document master Table
+
+      // console.log("postUploadFileData:", postUploadFileData);
+
+      // console.log("body", body);
+
       updateDocMasterVersion(body, (err, results) => {
-        // console.log(body);
 
         if (err) {
           logger.error(err);
@@ -608,7 +638,9 @@ module.exports = {
           });
         }
         else {
-          UpdateActiveStatus(body, (err, results) => {
+          UpdateActiveStatus(postUploadFileData, (err, results) => {
+            // console.log("results:", results);
+
             if (err) {
               logger.error(err);
               return res.status(500).json({
@@ -753,8 +785,8 @@ module.exports = {
     const fname = req.params.fname;
     // console.log("fname::", fname);
 
-    // const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
-    const filePath = `E:/Documents/${id}/${fname}`;
+    const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+    // const filePath = `E:/Documents/${id}/${fname}`;
     // console.log(filePath, "filePath");
 
     // Check if file exists
@@ -788,8 +820,8 @@ module.exports = {
   },
   getFilesall: (req, res) => {
     const id = req.params.docId;
-    // const folderPath = `F:/DocMeliora/Inteliqo/${id}`; //dummy
-    const folderPath = `E:/Documents/${id}`; // live
+    const folderPath = `F:/DocMeliora/Inteliqo/${id}`; //dummy
+    // const folderPath = `E:/Documents/${id}`; // live
     // console.log(folderPath);
 
     fs.readdir(folderPath, (err, files) => {

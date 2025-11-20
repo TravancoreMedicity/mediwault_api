@@ -5,11 +5,18 @@ module.exports = {
     // TABLE NAME - doc_type_master 
     insertDocTypeMaster: (data, callBack) => {
         mysqlpool.query(
-            `INSERT INTO doc_type_master (doc_type_master_name,main_type_slno,doc_type_master_status) VALUES (?,?,?)`,
+            `INSERT INTO doc_type_master (doc_type_master_name, main_type_slno, doc_type_master_status, create_user,
+             create_ip, create_browser_name, create_browser_version, create_os_name, create_os_version) VALUES (?,?,?,?,?,?,?,?,?)`,
             [
                 data.docTypeMasterName,
                 data.docMainType,
                 data.docTypeMasterStatus,
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion
             ],
             (error, results, fields) => {
                 if (error) {
@@ -23,15 +30,28 @@ module.exports = {
     editDocTypeMaster: (data, callBack) => {
         mysqlpool.query(
             `UPDATE doc_type_master 
-                SET 
-                        doc_type_master_name = ?, 
-                        main_type_slno = ?, 
-                        doc_type_master_status = ? 
-                WHERE doc_type_slno = ?`,
+           SET 
+             doc_type_master_name = ?, 
+             main_type_slno = ?, 
+             doc_type_master_status = ?,
+             edit_user = ?,
+             edit_ip = ?,
+             edit_browser_name = ?,
+             edit_browser_version = ?,
+             edit_os_name = ?,
+             edit_os_version = ?
+           WHERE doc_type_slno = ?
+           `,
             [
                 data.docTypeMasterName,
                 data.docMainType,
                 data.docTypeMasterStatus,
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion,
                 data.docTypeSlno
             ],
             (error, results, fields) => {
@@ -67,6 +87,8 @@ module.exports = {
                 D.doc_type_slno,
                 D.doc_type_master_name,
                 M.main_type_name,
+                D.main_type_slno,
+                D.doc_type_master_status,
                 IF(D.doc_type_master_status = 1,'Active','Inactive' ) status
             FROM doc_type_master D
             LEFT JOIN doc_main_type M ON D.main_type_slno = M.main_type_slno`,
