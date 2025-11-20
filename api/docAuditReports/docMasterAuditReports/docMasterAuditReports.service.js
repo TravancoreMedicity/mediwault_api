@@ -305,6 +305,78 @@ module.exports = {
             }
         )
     },
+    getInstituteTypeCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+              SELECT log_slno, institute_type_slno, institute_type_name, institute_type_status, create_user, create_date,
+              create_ip, create_browser_name, create_browser_version, create_os_name, create_os_version,user.name as username,
+              IF(institution_type_create_audit_log.institute_type_status = 1,'Active','Inactive' ) institute_status
+              FROM institution_type_create_audit_log
+              LEFT JOIN user ON user.user_slno=institution_type_create_audit_log.create_user
+            `,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getInstituteTypeEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+             SELECT log_slno,institute_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name,
+             edit_browser_version, edit_os_name, edit_os_version,user.name as username
+             FROM institution_type_edit_audit_log
+             LEFT JOIN user ON user.user_slno =institution_type_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    ///
+
+    getInstituteMastCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+               SELECT log_slno, institution_slno, institution_name, institution_mast_create_audit_log.institute_type_slno, institution_status, institution_mast_create_audit_log.create_user, 
+              institution_mast_create_audit_log.create_date, institution_mast_create_audit_log.create_ip, 
+              institution_mast_create_audit_log.create_browser_name, institution_mast_create_audit_log.create_browser_version, 
+              institution_mast_create_audit_log.create_os_name, institution_mast_create_audit_log.create_os_version,user.name as username,
+              IF(institution_mast_create_audit_log.institution_status = 1,'Active','Inactive' ) institute_status,institution_type_master.institute_type_name
+              FROM institution_mast_create_audit_log
+              LEFT JOIN user ON user.user_slno=institution_mast_create_audit_log.create_user
+			  LEFT JOIN institution_type_master ON institution_type_master.institute_type_slno=institution_mast_create_audit_log.institute_type_slno
+            `,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getInstituteMastEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+             SELECT log_slno, institution_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name, 
+             edit_browser_version, edit_os_name, edit_os_version,user.name as username
+             FROM institution_mast_edit_audit_log
+             LEFT JOIN user ON user.user_slno =institution_mast_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
 }
 
 

@@ -4,7 +4,7 @@ const { verifyToken } = require('../../tokenValidation/tokenValidation');
 const {
     getdocMasterCreateAuditReports, getdocMasterEditAuditReports, getdocDetailCreateAuditReports, getdocDetailEditAuditReports,
     getUserCreateAuditReports, getUserEditAuditReports, getDocTypeCreateAuditReports, getDocTypeEditAuditReports,
-    getSubTypeCreateAuditReports, getSubTypeEditAuditReports, getDocCatCreateAuditReports, getDocCatEditAuditReports, getDocSubCategoryAuditReports, getDocSubCategoryEditAuditReports, getDocNestedCatCreateAuditReports, getDocNestedCatEditAuditReports, getDocGroupCreateAuditReports, getDocGroupEditAuditReports
+    getSubTypeCreateAuditReports, getSubTypeEditAuditReports, getDocCatCreateAuditReports, getDocCatEditAuditReports, getDocSubCategoryAuditReports, getDocSubCategoryEditAuditReports, getDocNestedCatCreateAuditReports, getDocNestedCatEditAuditReports, getDocGroupCreateAuditReports, getDocGroupEditAuditReports, getInstituteTypeCreateAuditReports, getInstituteTypeEditAuditReports, getInstituteMastCreateAuditReports, getInstituteMastEditAuditReports
 
 } = require('./docMasterAuditReports.controller');
 
@@ -34,6 +34,12 @@ router.get('/getDocNestedCatEditAuditReports', verifyToken, getDocNestedCatEditA
 
 router.get('/getDocGroupCreateAuditReports', verifyToken, getDocGroupCreateAuditReports);
 router.get('/getDocGroupEditAuditReports', verifyToken, getDocGroupEditAuditReports);
+
+router.get('/getInstituteTypeCreateAuditReports', verifyToken, getInstituteTypeCreateAuditReports);
+router.get('/getInstituteTypeEditAuditReports', verifyToken, getInstituteTypeEditAuditReports);
+
+router.get('/getInstituteMastCreateAuditReports', verifyToken, getInstituteMastCreateAuditReports);
+router.get('/getInstituteMastEditAuditReports', verifyToken, getInstituteMastEditAuditReports);
 
 module.exports = router
 
