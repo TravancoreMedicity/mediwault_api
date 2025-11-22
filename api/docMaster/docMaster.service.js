@@ -536,7 +536,6 @@ module.exports = {
                          docVerDate,
                           docCreatedDate,
                            docCreateUser,
-                            
                                 create_user
               ) 
               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,

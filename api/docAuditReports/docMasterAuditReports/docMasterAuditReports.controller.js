@@ -1,6 +1,8 @@
 const {
     getdocMasterCreateAuditReports, getdocMasterEditAuditReports, getdocDetailCreateAuditReports, getdocDetailEditAuditReports,
-    getUserCreateAuditReports, getUserEditAuditReports, getDocTypeCreateAuditReports, getDocTypeEditAuditReports, getSubTypeCreateAuditReports, getSubTypeEditAuditReports, getDocCatCreateAuditReports, getDocCatEditAuditReports, getDocSubCategoryAuditReports, getDocSubCategoryEditAuditReports, getDocNestedCatCreateAuditReports, getDocNestedCatEditAuditReports, getDocGroupCreateAuditReports, getDocGroupEditAuditReports, getInstituteTypeCreateAuditReports, getInstituteTypeEditAuditReports, getInstituteMastCreateAuditReports, getInstituteMastEditAuditReports
+    getUserCreateAuditReports, getUserEditAuditReports, getDocTypeCreateAuditReports, getDocTypeEditAuditReports, getSubTypeCreateAuditReports, getSubTypeEditAuditReports, getDocCatCreateAuditReports, getDocCatEditAuditReports, getDocSubCategoryAuditReports, getDocSubCategoryEditAuditReports, getDocNestedCatCreateAuditReports, getDocNestedCatEditAuditReports, getDocGroupCreateAuditReports, getDocGroupEditAuditReports, getInstituteTypeCreateAuditReports, getInstituteTypeEditAuditReports, getInstituteMastCreateAuditReports, getInstituteMastEditAuditReports, getCourseTypeCreateAuditReports, getCourseTypeEditAuditReports, getCourseNameCreateAuditReports, getCourseNameEditAuditReports,
+    getLocationCreateAuditReports, getLocationEditAuditReports, getRackCreateAuditReports, getRackEditAuditReports, getCustDeptCreateAuditReports, getCustDeptEditAuditReports, getCustMasterCreateAuditReports, getCustMasterEditAuditReports
+
 
 } = require('./docMasterAuditReports.service');
 
@@ -382,6 +384,222 @@ module.exports = {
 
     getInstituteMastEditAuditReports: (req, res) => {
         getInstituteMastEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    getCourseTypeCreateAuditReports: (req, res) => {
+        getCourseTypeCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+
+    getCourseTypeEditAuditReports: (req, res) => {
+        getCourseTypeEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    getCourseNameCreateAuditReports: (req, res) => {
+        getCourseNameCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+
+    getCourseNameEditAuditReports: (req, res) => {
+        getCourseNameEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    getLocationCreateAuditReports: (req, res) => {
+        getLocationCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+
+    getLocationEditAuditReports: (req, res) => {
+        getLocationEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    getRackCreateAuditReports: (req, res) => {
+        getRackCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+
+    getRackEditAuditReports: (req, res) => {
+        getRackEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    getCustDeptCreateAuditReports: (req, res) => {
+        getCustDeptCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    getCustDeptEditAuditReports: (req, res) => {
+        getCustDeptEditAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+    //uyhuijhi
+    getCustMasterCreateAuditReports: (req, res) => {
+        getCustMasterCreateAuditReports((error, results) => {
+            if (error) {
+                return res.status(500).json({
+                    success: 0,
+                    message: "Database connection error"
+                });
+            }
+
+            if (results) {
+                return res.status(200).json({
+                    success: 1,
+                    data: results
+                });
+            }
+        })
+    },
+
+    getCustMasterEditAuditReports: (req, res) => {
+        getCustMasterEditAuditReports((error, results) => {
             if (error) {
                 return res.status(500).json({
                     success: 0,

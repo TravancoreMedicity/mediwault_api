@@ -785,8 +785,8 @@ module.exports = {
     const fname = req.params.fname;
     // console.log("fname::", fname);
 
-    const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
-    // const filePath = `E:/Documents/${id}/${fname}`;
+    // const filePath = `F:/DocMeliora/Inteliqo/${id}/${fname}`;
+    const filePath = `E:/Documents/${id}/${fname}`;
     // console.log(filePath, "filePath");
 
     // Check if file exists
@@ -820,8 +820,8 @@ module.exports = {
   },
   getFilesall: (req, res) => {
     const id = req.params.docId;
-    const folderPath = `F:/DocMeliora/Inteliqo/${id}`; //dummy
-    // const folderPath = `E:/Documents/${id}`; // live
+    // const folderPath = `F:/DocMeliora/Inteliqo/${id}`; //dummy
+    const folderPath = `E:/Documents/${id}`; // live
     // console.log(folderPath);
 
     fs.readdir(folderPath, (err, files) => {
