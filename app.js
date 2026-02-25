@@ -35,7 +35,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://192.168.22.3:3000", "http://192.168.10.88:7078"],
+    origin: ["http://localhost:3000", "http://192.168.22.3:3000", "http://192.168.10.88:7078", "http://192.168.22.3:3001"],
     credentials: true,
   })
 );

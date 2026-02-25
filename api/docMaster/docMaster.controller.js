@@ -782,6 +782,9 @@ module.exports = {
   // },
   getFiles: (req, res) => {
     const id = req.params.docId;
+
+    // console.log("id::::::", id);
+
     const fname = req.params.fname;
     // console.log("fname::", fname);
 
@@ -826,7 +829,7 @@ module.exports = {
 
     fs.readdir(folderPath, (err, files) => {
       if (err) {
-        console.error(err);
+        // console.error(err);
         return res.status(200).json({
           success: 0,
           message: err.message,

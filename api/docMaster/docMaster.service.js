@@ -90,9 +90,10 @@ module.exports = {
 
   getDocMaster: (callBack) => {
     mysqlpool.query(
-      `SELECT
-            ROW_NUMBER() OVER () as doc_slno,
-         
+      `
+           SELECT
+            ROW_NUMBER() OVER () as docslno,
+          D.doc_slno,
           D.doc_id,
           D.doc_number,
           CONCAT(D.docVer ,'.', D.docVer_amentment,'.',D.dovVer_infoAment) AS docVer,
@@ -313,7 +314,7 @@ module.exports = {
             LEFT JOIN custodian_master CN ON CN.cust_slno = D.docCustodian
             LEFT JOIN user U ON U.user_slno = D.uploadUser
             LEFT JOIN doc_nested_cat_mast J ON J.nested_cat_slno = D.nested_category
-        WHERE docStatus = 1 AND doc_slno = ?`,
+        WHERE D.docStatus = 1 AND D.doc_slno = ?`,
       [id],
       (error, results, fields) => {
         if (error) {

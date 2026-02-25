@@ -56,7 +56,7 @@ module.exports = {
                 data.rackSlno
             ],
             (error, results, fields) => {
-                console.log("error::", error);
+                // console.log("error::", error);
 
                 if (error) {
                     logger.error(error)

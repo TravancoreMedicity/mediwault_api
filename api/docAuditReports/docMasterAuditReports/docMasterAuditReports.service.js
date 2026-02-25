@@ -211,7 +211,7 @@ module.exports = {
              doc_subcat_create_audit_log.create_date, doc_subcat_create_audit_log.create_ip,
              doc_subcat_create_audit_log.create_browser_name, doc_subcat_create_audit_log.create_browser_version,
              doc_subcat_create_audit_log.create_os_name, doc_subcat_create_audit_log.create_os_version,user.name as username,
-             IF(doc_subcat_create_audit_log.subcat_status = 1,'Active','Inactive' ) sub_category_status,category_name
+             IF(doc_subcat_create_audit_log.subcat_status = 1,'Active','Inactive' ) sub_category_status,doc_category_master.category_name
              FROM doc_subcat_create_audit_log
 			 LEFT JOIN user ON user.user_slno =doc_subcat_create_audit_log.create_user
              LEFT JOIN doc_category_master ON doc_category_master.cat_slno=doc_subcat_create_audit_log.cat_slno
@@ -240,14 +240,13 @@ module.exports = {
     getDocNestedCatCreateAuditReports: (callBack) => {
         mysqlpool.query(
             ` 
-              SELECT log_slno, nested_cat_slno, nested_cat_name, sub_cat_slno, nested_cat_status, doc_nestedcat_create_audit_log.create_user, 
-              doc_nestedcat_create_audit_log.create_date, doc_nestedcat_create_audit_log.create_ip,
-              doc_nestedcat_create_audit_log.create_browser_name, doc_nestedcat_create_audit_log.create_browser_version, doc_nestedcat_create_audit_log.create_os_name,
-              doc_nestedcat_create_audit_log.create_os_version,user.name as username,doc_subcat_master.subcat_name,
-              IF(doc_nestedcat_create_audit_log.nested_cat_status = 1,'Active','Inactive' ) nested_catstatus
-              FROM doc_nestedcat_create_audit_log
-              LEFT JOIN user ON user.user_slno=doc_nestedcat_create_audit_log.create_user
-              LEFT JOIN doc_subcat_master ON doc_subcat_master.subcat_slno=doc_nestedcat_create_audit_log.sub_cat_slno
+               SELECT log_slno, nested_cat_slno, nested_cat_name, sub_cat_slno, nested_cat_status,  D.create_user, 
+               D.create_date,  D.create_ip,D.create_browser_name,  D.create_browser_version,  D.create_os_name,
+               D.create_os_version,user.name as username,doc_subcat_master.subcat_name,
+               IF( D.nested_cat_status = 1,'Active','Inactive' ) nested_catstatus
+               FROM doc_nestedcat_create_audit_log as D
+               LEFT JOIN doc_subcat_master ON doc_subcat_master.subcat_slno= D.sub_cat_slno
+               LEFT JOIN user ON user.user_slno= D.create_user
             `,
             (error, results, fields) => {
                 if (error) {
