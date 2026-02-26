@@ -4,7 +4,9 @@ const { verifyToken } = require('../../tokenValidation/tokenValidation');
 const {
     getdocMasterCreateAuditReports, getdocMasterEditAuditReports, getdocDetailCreateAuditReports, getdocDetailEditAuditReports,
     getUserCreateAuditReports, getUserEditAuditReports, getDocTypeCreateAuditReports, getDocTypeEditAuditReports,
-    getSubTypeCreateAuditReports, getSubTypeEditAuditReports, getDocCatCreateAuditReports, getDocCatEditAuditReports, getDocSubCategoryAuditReports, getDocSubCategoryEditAuditReports, getDocNestedCatCreateAuditReports, getDocNestedCatEditAuditReports, getDocGroupCreateAuditReports, getDocGroupEditAuditReports, getInstituteTypeCreateAuditReports, getInstituteTypeEditAuditReports, getInstituteMastCreateAuditReports, getInstituteMastEditAuditReports
+    getSubTypeCreateAuditReports, getSubTypeEditAuditReports, getDocCatCreateAuditReports, getDocCatEditAuditReports, getDocSubCategoryAuditReports, getDocSubCategoryEditAuditReports, getDocNestedCatCreateAuditReports, getDocNestedCatEditAuditReports, getDocGroupCreateAuditReports, getDocGroupEditAuditReports, getInstituteTypeCreateAuditReports, getInstituteTypeEditAuditReports, getInstituteMastCreateAuditReports, getInstituteMastEditAuditReports, getCourseTypeCreateAuditReports, getCourseTypeEditAuditReports, getCourseNameCreateAuditReports, getCourseNameEditAuditReports,
+    getLocationCreateAuditReports, getLocationEditAuditReports, getRackCreateAuditReports, getRackEditAuditReports, getCustDeptCreateAuditReports, getCustDeptEditAuditReports, getCustMasterCreateAuditReports, getCustMasterEditAuditReports
+
 
 } = require('./docMasterAuditReports.controller');
 
@@ -40,6 +42,24 @@ router.get('/getInstituteTypeEditAuditReports', verifyToken, getInstituteTypeEdi
 
 router.get('/getInstituteMastCreateAuditReports', verifyToken, getInstituteMastCreateAuditReports);
 router.get('/getInstituteMastEditAuditReports', verifyToken, getInstituteMastEditAuditReports);
+
+router.get('/getCourseTypeCreateAuditReports', verifyToken, getCourseTypeCreateAuditReports);
+router.get('/getCourseTypeEditAuditReports', verifyToken, getCourseTypeEditAuditReports);
+
+router.get('/getCourseNameCreateAuditReports', verifyToken, getCourseNameCreateAuditReports);
+router.get('/getCourseNameEditAuditReports', verifyToken, getCourseNameEditAuditReports);
+
+router.get('/getLocationCreateAuditReports', verifyToken, getLocationCreateAuditReports);
+router.get('/getLocationEditAuditReports', verifyToken, getLocationEditAuditReports);
+
+router.get('/getRackCreateAuditReports', verifyToken, getRackCreateAuditReports);
+router.get('/getRackEditAuditReports', verifyToken, getRackEditAuditReports);
+
+router.get('/getCustDeptCreateAuditReports', verifyToken, getCustDeptCreateAuditReports);
+router.get('/getCustDeptEditAuditReports', verifyToken, getCustDeptEditAuditReports);
+
+router.get('/getCustMasterCreateAuditReports', verifyToken, getCustMasterCreateAuditReports);
+router.get('/getCustMasterEditAuditReports', verifyToken, getCustMasterEditAuditReports);
 
 module.exports = router
 

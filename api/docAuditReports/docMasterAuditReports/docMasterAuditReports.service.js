@@ -211,7 +211,7 @@ module.exports = {
              doc_subcat_create_audit_log.create_date, doc_subcat_create_audit_log.create_ip,
              doc_subcat_create_audit_log.create_browser_name, doc_subcat_create_audit_log.create_browser_version,
              doc_subcat_create_audit_log.create_os_name, doc_subcat_create_audit_log.create_os_version,user.name as username,
-             IF(doc_subcat_create_audit_log.subcat_status = 1,'Active','Inactive' ) sub_category_status,category_name
+             IF(doc_subcat_create_audit_log.subcat_status = 1,'Active','Inactive' ) sub_category_status,doc_category_master.category_name
              FROM doc_subcat_create_audit_log
 			 LEFT JOIN user ON user.user_slno =doc_subcat_create_audit_log.create_user
              LEFT JOIN doc_category_master ON doc_category_master.cat_slno=doc_subcat_create_audit_log.cat_slno
@@ -240,14 +240,13 @@ module.exports = {
     getDocNestedCatCreateAuditReports: (callBack) => {
         mysqlpool.query(
             ` 
-              SELECT log_slno, nested_cat_slno, nested_cat_name, sub_cat_slno, nested_cat_status, doc_nestedcat_create_audit_log.create_user, 
-              doc_nestedcat_create_audit_log.create_date, doc_nestedcat_create_audit_log.create_ip,
-              doc_nestedcat_create_audit_log.create_browser_name, doc_nestedcat_create_audit_log.create_browser_version, doc_nestedcat_create_audit_log.create_os_name,
-              doc_nestedcat_create_audit_log.create_os_version,user.name as username,doc_subcat_master.subcat_name,
-              IF(doc_nestedcat_create_audit_log.nested_cat_status = 1,'Active','Inactive' ) nested_catstatus
-              FROM doc_nestedcat_create_audit_log
-              LEFT JOIN user ON user.user_slno=doc_nestedcat_create_audit_log.create_user
-              LEFT JOIN doc_subcat_master ON doc_subcat_master.subcat_slno=doc_nestedcat_create_audit_log.sub_cat_slno
+               SELECT log_slno, nested_cat_slno, nested_cat_name, sub_cat_slno, nested_cat_status,  D.create_user, 
+               D.create_date,  D.create_ip,D.create_browser_name,  D.create_browser_version,  D.create_os_name,
+               D.create_os_version,user.name as username,doc_subcat_master.subcat_name,
+               IF( D.nested_cat_status = 1,'Active','Inactive' ) nested_catstatus
+               FROM doc_nestedcat_create_audit_log as D
+               LEFT JOIN doc_subcat_master ON doc_subcat_master.subcat_slno= D.sub_cat_slno
+               LEFT JOIN user ON user.user_slno= D.create_user
             `,
             (error, results, fields) => {
                 if (error) {
@@ -339,8 +338,6 @@ module.exports = {
         )
     },
 
-    ///
-
     getInstituteMastCreateAuditReports: (callBack) => {
         mysqlpool.query(
             ` 
@@ -377,6 +374,209 @@ module.exports = {
             }
         )
     },
+
+    getCourseTypeCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+              SELECT log_slno, course_type_slno, course_type_name, course_type_status, create_user, create_date, create_ip,
+              create_browser_name, create_browser_version, create_os_name, create_os_version,user.name as username,
+              IF(coursetype_create_audit_log.course_type_status = 1,'Active','Inactive' ) course_status
+              FROM coursetype_create_audit_log
+              LEFT JOIN user ON user.user_slno=coursetype_create_audit_log.create_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getCourseTypeEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+             SELECT log_slno, course_type_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name,
+             edit_browser_version, edit_os_name, edit_os_version,user.name as username
+             FROM coursetype_edit_audit_log
+             LEFT JOIN user ON user.user_slno =coursetype_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getCourseNameCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+              SELECT log_slno, course_slno, course_name, D.course_type_slno, course_status, D.create_user, D.create_date, D.create_ip,
+              D.create_browser_name, D.create_browser_version, D.create_os_name, D.create_os_version,user.name as username,
+              IF(D.course_status = 1,'Active','Inactive' ) course_status,course_type.course_type_name
+              FROM coursemaster_create_audit_log as D
+              LEFT JOIN user ON user.user_slno=D.create_user
+              LEFT JOIN course_type ON course_type.course_type_slno=D.course_type_slno`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getCourseNameEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+             SELECT log_slno, course_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name, 
+             edit_browser_version, edit_os_name, edit_os_version,user.name as username
+             FROM coursemaster_edit_audit_log
+             LEFT JOIN user ON user.user_slno =coursemaster_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    //location
+    getLocationCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+                 SELECT log_slno, loc_slno, loc_name, loc_status, create_user, create_date, create_ip, create_browser_name, 
+	             create_browser_version, create_os_name, create_os_version,user.name as username,
+	             IF(D.loc_status = 1,'Active','Inactive' ) locationstatus
+	             FROM location_create_audit_log as D
+                 LEFT JOIN user ON user.user_slno=D.create_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getLocationEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+            SELECT log_slno, loc_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name,
+            edit_browser_version, edit_os_name, edit_os_version,user.name as username
+            FROM location_edit_audit_log
+            LEFT JOIN user ON user.user_slno =location_edit_audit_log.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getRackCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+                 SELECT log_slno, rac_slno, rac_desc, rac_alice, D.loc_slno, rac_status, D.create_user, D.create_date, D.create_ip, D.create_browser_name, 
+                 D.create_browser_version, D.create_os_name, D.create_os_version,user.name as username,location_master.loc_name,
+	             IF(D.rac_status = 1,'Active','Inactive' ) rackstatus
+	             FROM rackmaster_create_audit_log as D
+                 LEFT JOIN user ON user.user_slno=D.create_user
+                 LEFT JOIN location_master ON location_master.loc_slno=D.loc_slno`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getRackEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+            SELECT log_slno, rac_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name, edit_browser_version,
+                 edit_os_name, edit_os_version,user.name as username
+	             FROM rackmaster_edit_audit_log as D
+                 LEFT JOIN user ON user.user_slno=D.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getCustDeptCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+                 SELECT log_slno, cust_dept_slno, cust_dept_name, cust_dept_status, D.create_user, D.create_date, D.create_ip, 
+                 D.create_browser_name, D.create_browser_version, D.create_os_name, D.create_os_version,user.name as username,
+	             IF(D.cust_dept_status = 1,'Active','Inactive' ) custdept_status
+	             FROM custodian_department_create_audit_log as D
+                 LEFT JOIN user ON user.user_slno=D.create_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getCustDeptEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+             SELECT log_slno, cust_dept_slno, prev_event, new_event, edit_user,edit_ip, edit_date, edit_browser_name,
+                 edit_browser_version, edit_os_name, edit_os_version,user.name as username
+	             FROM custodian_department_edit_audit_log as D
+                 LEFT JOIN user ON user.user_slno=D.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getCustMasterCreateAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+                    SELECT log_slno, D.cust_slno, cust_name, D.cust_dept_slno, cust_status, D.create_user, D.create_date, D.create_ip, 
+                 D.create_browser_name, D.create_browser_version, D.create_os_name, D.create_os_version,user.name as username,
+	             IF(D.cust_status = 1,'Active','Inactive' ) custstatus,custodian_department.cust_dept_name
+	             FROM custodianmaster_create_audit_log as D
+                 LEFT JOIN user ON user.user_slno=D.create_user
+                 LEFT JOIN custodian_department ON custodian_department.cust_dept_slno=D.cust_dept_slno`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
+
+    getCustMasterEditAuditReports: (callBack) => {
+        mysqlpool.query(
+            ` 
+                 SELECT log_slno, D.cust_slno, prev_event, new_event, edit_user, edit_date, edit_ip, edit_browser_name, 
+                 edit_browser_version, edit_os_name, edit_os_version,user.name as username
+	             FROM custodianmaster_edit_audit_log as D
+                 LEFT JOIN user ON user.user_slno=D.edit_user`,
+            (error, results, fields) => {
+                if (error) {
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
+    },
 }
+
 
 

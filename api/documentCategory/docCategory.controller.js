@@ -73,7 +73,7 @@ module.exports = {
     editDocCategory: (req, res) => {
         const body = req.body;
         editDocCategory(body, (error, results) => {
-            console.log(results);
+            // console.log(results);
 
             if (error) {
                 logger.error(error);

@@ -4,11 +4,17 @@ const logger = require('../../logger/logger')
 module.exports = {
     insertCustodianMaster: (data, callBack) => {
         mysqlpool.execute(
-            `INSERT INTO custodian_master (cust_name,cust_dept_slno,cust_status) VALUES (?,?,?)`,
+            `INSERT INTO custodian_master (cust_name, cust_dept_slno, cust_status, create_user,create_ip, create_browser_name, create_browser_version, create_os_name, create_os_version) VALUES (?,?,?,?,?,?,?,?,?)`,
             [
                 data.custodian_name,
                 data.custodian_department_name,
-                data.custodian_status
+                data.custodian_status,
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion,
             ],
             (error, results, fields) => {
                 if (error) {
@@ -51,12 +57,28 @@ module.exports = {
     },
     updateCustodianMaster: (data, callBack) => {
         mysqlpool.execute(
-            `UPDATE custodian_master SET cust_name = ?, cust_dept_slno = ?, cust_status = ? WHERE cust_slno = ?`,
+            `UPDATE custodian_master SET 
+            cust_name = ?,
+            cust_dept_slno = ?,
+            cust_status = ?,
+            edit_user=?,
+            edit_ip=?,
+            edit_browser_name=?,
+            edit_browser_version=?,
+            edit_os_name=?,
+            edit_os_version=?
+            WHERE cust_slno = ?`,
             [
                 data.custodian_name,
                 data.custodian_department_name,
                 data.custodian_status,
-                data.custodian_slno
+                data.user,
+                data.IPAddress,
+                data.browserName,
+                data.browserVersion,
+                data.osName,
+                data.osVersion,
+                data.custMastSlno
             ],
             (error, results, fields) => {
                 if (error) {
@@ -88,9 +110,11 @@ module.exports = {
                 M.cust_slno,
                 M.cust_name,
                 D.cust_dept_name,
+                M.cust_status,
+                M.cust_dept_slno,
                 IF(M.cust_status = 0 , 'Inactive','Active') status
             FROM custodian_master M
-            LEFT JOIN custodian_department D ON D.cust_dept_slno = M. cust_dept_slno
+            LEFT JOIN custodian_department D ON D.cust_dept_slno = M.cust_dept_slno
             WHERE cust_status = 1`,
             (error, results, fields) => {
                 if (error) {
