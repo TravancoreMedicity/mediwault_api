@@ -823,7 +823,7 @@ module.exports = {
   },
   getFilesall: (req, res) => {
     const id = req.params.docId;
-    // const folderPath = `F:/DocMeliora/Inteliqo/${id}`; //dummy
+    // const folderPath = `F:/DocMeliora/Inteliqo/${id}`;
     const folderPath = `E:/Documents/${id}`; // live
     // console.log(folderPath);
 
