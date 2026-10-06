@@ -286,7 +286,7 @@ module.exports = {
             LM.loc_name,
             CONCAT(R.rac_alice ,' - ', UPPER(LM.loc_name)) AS rack, -- RACK AND LOCATION NAME
             D.docCustodian, 
-            CN.cust_name,-- CUSTODIAN NAME
+            COALESCE(CD.cust_dept_name, CN.cust_name) AS cust_name,-- CUSTODIAN DEPARTMENT / CUSTODIAN NAME
             D.uploadUser,
             U.name,
             D.uploadDate,
@@ -311,6 +311,7 @@ module.exports = {
             LEFT JOIN doc_group_master DG ON DG.group_slno = D.group_mast
             LEFT JOIN rack_master R ON R.rac_slno = D.docRack
             LEFT JOIN location_master LM ON LM.loc_slno = R.loc_slno
+            LEFT JOIN custodian_department CD ON CD.cust_dept_slno = D.docCustodian
             LEFT JOIN custodian_master CN ON CN.cust_slno = D.docCustodian
             LEFT JOIN user U ON U.user_slno = D.uploadUser
             LEFT JOIN doc_nested_cat_mast J ON J.nested_cat_slno = D.nested_category
@@ -971,7 +972,7 @@ SELECT
             LM.loc_name,
             CONCAT(R.rac_alice ,' - ', UPPER(LM.loc_name)) AS rack, -- RACK AND LOCATION NAME
             D.docCustodian, 
-            CN.cust_name,-- CUSTODIAN NAME
+            COALESCE(CD.cust_dept_name, CN.cust_name) AS cust_name,-- CUSTODIAN DEPARTMENT / CUSTODIAN NAME
             D.uploadUser,
             U.name,
             D.uploadDate,
@@ -988,6 +989,7 @@ SELECT
             LEFT JOIN doc_group_master DG ON DG.group_slno = D.group_mast
             LEFT JOIN rack_master R ON R.rac_slno = D.docRack
             LEFT JOIN location_master LM ON LM.loc_slno = R.loc_slno
+            LEFT JOIN custodian_department CD ON CD.cust_dept_slno = D.docCustodian
             LEFT JOIN custodian_master CN ON CN.cust_slno = D.docCustodian
             LEFT JOIN user U ON U.user_slno = D.uploadUser
         WHERE docStatus = 1 AND D.doc_type = ?`,
