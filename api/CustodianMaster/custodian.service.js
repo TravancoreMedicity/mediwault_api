@@ -139,5 +139,23 @@ module.exports = {
                 return callBack(null, results)
             }
         )
+    },
+    selectCustodianByDept: (id, callBack) => {
+        mysqlpool.query(
+            `SELECT 
+                cust_slno,
+                cust_name 
+            FROM custodian_master WHERE cust_dept_slno = ? AND cust_status = 1`,
+            [
+                id
+            ],
+            (error, results, fields) => {
+                if (error) {
+                    logger.error(error)
+                    return callBack(error)
+                }
+                return callBack(null, results)
+            }
+        )
     }
 }

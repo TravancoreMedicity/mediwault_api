@@ -7,7 +7,8 @@ const {
     selectCustodianMasterById,
     updateCustodianMaster,
     deleteCustodianMaster,
-    selectCustodianMasterList
+    selectCustodianMasterList,
+    selectCustodianByDept
 } = require('./custodian.controller');
 
 router.post('/insertCustodianMaster', verifyToken, insertCustodianMaster);
@@ -16,5 +17,6 @@ router.patch('/updateCustodianMaster', verifyToken, updateCustodianMaster);
 router.delete('/deleteCustodianMaster/:id', verifyToken, deleteCustodianMaster);
 router.get('/selectCustodianMasterById/:id', verifyToken, selectCustodianMasterById);
 router.get('/selectCustodianMasterList', verifyToken, selectCustodianMasterList);
+router.get('/selectCustodianByDept/:id', verifyToken, selectCustodianByDept);
 
 module.exports = router
